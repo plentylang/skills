@@ -1,0 +1,3557 @@
+<!-- Copied from the Plenty 0.7.1 book page book/src/design/stdlib/signatures.md. Edit the book, not this copy. -->
+
+# Standard library signatures
+
+Every public declaration of each `std` module, one line each, so you can
+check that an operation exists and what it returns before reading its
+module page. The page states the contracts: ownership, allocation, error
+variants, and limits. `pub` is omitted. Fields, methods, and variants are
+indented under their owner. Summaries come from the
+[module table](index.md#modules).
+
+## Modules
+
+Each section's lines in this file, so one module can be read alone.
+
+- [`std.actor`](#stdactor): 102-174
+- [`std.actor.net`](#stdactornet): 176-239
+- [`std.actor.tls`](#stdactortls): 241-270
+- [`std.archive`](#stdarchive): 272-338
+- [`std.atomic`](#stdatomic): 340-349
+- [`std.bytes`](#stdbytes): 351-446
+- [`std.cache.lru`](#stdcachelru): 448-470
+- [`std.channel`](#stdchannel): 472-476
+- [`std.cli`](#stdcli): 478-508
+- [`std.cli.fileinput`](#stdclifileinput): 510-519
+- [`std.cli.progress`](#stdcliprogress): 521-545
+- [`std.collections`](#stdcollections): 547-574
+- [`std.complex`](#stdcomplex): 576-602
+- [`std.compress`](#stdcompress): 604-634
+- [`std.concurrent`](#stdconcurrent): 636-640
+- [`std.crypto`](#stdcrypto): 642-723
+- [`std.csv`](#stdcsv): 725-788
+- [`std.dataframe`](#stddataframe): 790-989
+- [`std.db.kv`](#stddbkv): 991-1023
+- [`std.db.sqlite`](#stddbsqlite): 1025-1089
+- [`std.deque`](#stddeque): 1091-1105
+- [`std.diff`](#stddiff): 1107-1136
+- [`std.encoding`](#stdencoding): 1138-1199
+- [`std.env`](#stdenv): 1201-1215
+- [`std.error`](#stderror): 1217-1237
+- [`std.fmt`](#stdfmt): 1239-1292
+- [`std.fs`](#stdfs): 1294-1377
+- [`std.fs.dirs`](#stdfsdirs): 1379-1389
+- [`std.fs.watch`](#stdfswatch): 1391-1426
+- [`std.graph`](#stdgraph): 1428-1516
+- [`std.http`](#stdhttp): 1518-1587
+- [`std.http.body`](#stdhttpbody): 1589-1624
+- [`std.http.client`](#stdhttpclient): 1626-1736
+- [`std.http.cookie`](#stdhttpcookie): 1738-1770
+- [`std.http.files`](#stdhttpfiles): 1772-1785
+- [`std.http.https`](#stdhttphttps): 1787-1801
+- [`std.http.proxy`](#stdhttpproxy): 1803-1824
+- [`std.http.server`](#stdhttpserver): 1826-1911
+- [`std.http.sse`](#stdhttpsse): 1913-1932
+- [`std.http.tls`](#stdhttptls): 1934-1951
+- [`std.http.typed`](#stdhttptyped): 1953-1986
+- [`std.http.websocket`](#stdhttpwebsocket): 1988-2023
+- [`std.http.wss`](#stdhttpwss): 2025-2031
+- [`std.io`](#stdio): 2033-2113
+- [`std.io.typed`](#stdiotyped): 2115-2153
+- [`std.json`](#stdjson): 2155-2219
+- [`std.log`](#stdlog): 2221-2288
+- [`std.markdown`](#stdmarkdown): 2290-2324
+- [`std.template`](#stdtemplate): 2326-2347
+- [`std.math`](#stdmath): 2349-2415
+- [`std.net`](#stdnet): 2417-2499
+- [`std.path`](#stdpath): 2501-2518
+- [`std.process`](#stdprocess): 2520-2566
+- [`std.random`](#stdrandom): 2568-2589
+- [`std.ready`](#stdready): 2591-2621
+- [`std.regex`](#stdregex): 2623-2676
+- [`std.report`](#stdreport): 2678-2701
+- [`std.secrets`](#stdsecrets): 2703-2729
+- [`std.shlex`](#stdshlex): 2731-2740
+- [`std.sketch`](#stdsketch): 2742-2780
+- [`std.sketch.xor`](#stdsketchxor): 2782-2793
+- [`std.sketch.cuckoo`](#stdsketchcuckoo): 2795-2810
+- [`std.signal`](#stdsignal): 2812-2829
+- [`std.simd`](#stdsimd): 2831-2932
+- [`std.stat`](#stdstat): 2934-2967
+- [`std.plot`](#stdplot): 2969-3058
+- [`std.linalg`](#stdlinalg): 3060-3101
+- [`std.sync`](#stdsync): 3103-3112
+- [`std.system`](#stdsystem): 3114-3172
+- [`std.tempfile`](#stdtempfile): 3174-3206
+- [`std.test`](#stdtest): 3208-3250
+- [`std.text`](#stdtext): 3252-3271
+- [`std.thread`](#stdthread): 3273-3277
+- [`std.time`](#stdtime): 3279-3323
+- [`std.tls`](#stdtls): 3325-3407
+- [`std.toml`](#stdtoml): 3409-3458
+- [`std.unicode`](#stdunicode): 3460-3472
+- [`std.url`](#stdurl): 3474-3502
+- [`std.uuid`](#stduuid): 3504-3527
+- [`std.xml`](#stdxml): 3529-3562
+
+## `std.actor`
+
+Supervised actors on one thread, each with its own heap, bounded mailbox and copied messages; a trap discards only that actor's heap and files; timers, request-reply and restart. Errors: `StartError`, `Undelivered[M]`, `TimerError`, `RequestError[M]`. [Reference](actor.md).
+
+```text
+const max_heap_limit: i64 = 67108864
+const max_spawns: i64 = 16
+const max_capacity: i64 = 1048576
+class Address
+    def key(self) -> u64
+class Watch
+    def key(self) -> u64
+class Timer
+    def key(self) -> u64
+    def tag(self) -> i64
+class Request
+    def key(self) -> u64
+enum Reply[M]
+    Answer(M) | TimedOut | Gone
+enum TimerError
+    Capacity | Range
+enum RequestError[M]
+    Full(M) | Gone(M) | Capacity(M)
+enum Exit[E]
+    # Stopped by `Context.stop`, a `Stop` request, or a spawn hook that | Failed(E) | Trapped(TrapKind)
+enum TrapKind
+    Memory | Index | Arithmetic | Unwrap | Other
+enum Mail[M, E]
+    Message(M) | Ready(Watch, Readiness) | Down(Address, i64, Exit[E]) | Stop | Timer(Timer) | Request(Request, M) | Reply(Request, Reply[M])
+enum Undelivered[M]
+    Full(M) | Gone(M)
+enum StartError
+    Unsupported | Capacity | Heaps | Limit | Mailbox
+class Stats
+    started: i64
+    stopped: i64
+    failed: i64
+    trapped: i64
+    restarted: i64
+    delivered: i64
+    full: i64
+    gone: i64
+    lost: i64
+def supported() -> bool
+def heaps_live() -> i64
+def heap_bytes_used() -> i64
+def heap_bytes_committed() -> i64
+class Context[M, E]
+    def address(self) -> Address
+    def stop(self: &mut Context[M, E]) -> ()
+    def heap_used(self) -> i64
+    def send(self: &mut Context[M, E], to: Address, message: M) -> Result[(), Undelivered[M]]
+    def stop_actor(self: &mut Context[M, E], to: Address) -> bool
+    def spawn(self: &mut Context[M, E], tag: i64, limit: i64) -> Result[Address, StartError]
+    def restart(self: &mut Context[M, E], child: Address, limit: i64, window: &Duration) -> bool
+    def after(self: &mut Context[M, E], delay: &Duration, tag: i64) -> Result[Timer, TimerError]
+    def every(self: &mut Context[M, E], period: &Duration, tag: i64) -> Result[Timer, TimerError]
+    def cancel(self: &mut Context[M, E], timer: Timer) -> bool
+    def request(self: &mut Context[M, E], to: Address, message: M, timeout: &Duration) -> Result[Request, RequestError[M]]
+    def reply(self: &mut Context[M, E], request: Request, message: M) -> Result[(), Undelivered[M]]
+    def watch[H: Watchable](self: &mut Context[M, E], handle: &H, interest: Interest) -> Result[Watch, WaitError]
+    def unwatch[H: Watchable](self: &mut Context[M, E], handle: &H) -> Result[(), WaitError]
+class Stage[N, M, E]
+    def start(self: &mut Stage[N, M, E], node: N, limit: i64) -> Result[Address, StartError]
+    def send(self: &mut Stage[N, M, E], to: Address, message: M) -> Result[(), Undelivered[M]]
+    def stop_actor(self: &mut Stage[N, M, E], to: Address) -> bool
+    def add_timers(self: &mut Stage[N, M, E], count: i64) -> Result[(), AllocError]
+    def live(self) -> i64
+    def stats(self) -> Stats
+    def heap_used(self, actor: Address) -> Option[i64]
+    def run(self: &mut Stage[N, M, E], deadline: &Deadline, cancel: &CancellationToken) -> Result[(), WaitError]
+def stage[N, M, E](capacity: i64, mailbox: i64, events: i64) -> Result[Stage[N, M, E], AllocError | WaitError]
+```
+
+## `std.actor.net`
+
+TCP for actors: a listener that starts one actor per connection with admission limits, connections with bounded buffers, back-pressure and deadlines, and nonblocking connect and lookup. Errors: `NetError`, `TimerError`, `BytesError`. [Reference](actor-net.md).
+
+```text
+class Limits
+    input: i64
+    output: i64
+    idle: Duration
+    stall: Duration
+enum Expired
+    Idle | Read | Write
+class Events
+    mine: bool
+    received: i64
+    ended: bool
+    writable: bool
+    drained: bool
+    expired: Option[Expired]
+class Connection
+    def start[M, E](self: &mut Connection, context: &mut Context[M, E]) -> Result[(), NetError | TimerError]
+    def handle[M, E](self: &mut Connection, mail: &Mail[M, E], context: &mut Context[M, E]) -> Result[Events, NetError | TimerError]
+    def input(self) -> &Bytes
+    def input_start(self) -> i64
+    def input_stop(self) -> i64
+    def available(self) -> i64
+    def consume[M, E](self: &mut Connection, count: i64, context: &mut Context[M, E]) -> Result[(), NetError | TimerError]
+    def pending(self) -> i64
+    def space(self) -> i64
+    def write[S: ByteSource, M, E](self: &mut Connection, source: &S, start: i64, stop: i64, context: &mut Context[M, E]) -> Result[i64, NetError | TimerError]
+    def reserve(self: &mut Connection, wanted: i64) -> Result[i64, NetError]
+    def output(self: &mut Connection) -> &mut Bytes
+    def output_stop(self) -> i64
+    def commit[M, E](self: &mut Connection, count: i64, context: &mut Context[M, E]) -> Result[(), NetError | TimerError]
+    def forward[M, E](self: &mut Connection, count: i64, context: &mut Context[M, E]) -> Result[i64, NetError | TimerError]
+    def read_within[M, E](self: &mut Connection, span: &Duration, context: &mut Context[M, E]) -> Result[(), NetError | TimerError]
+    def clear_read_deadline(self: &mut Connection) -> ()
+    def shutdown_write[M, E](self: &mut Connection, context: &mut Context[M, E]) -> Result[(), NetError | TimerError]
+    def close[M, E](self: &mut Connection, context: &mut Context[M, E]) -> Result[(), NetError]
+    def acknowledge_now(self: &mut Connection) -> ()
+    def reading(self) -> bool
+    def closed(self) -> bool
+    def stream(self) -> &TcpStream
+def connection(stream: TcpStream, limits: &Limits) -> Result[Connection, BytesError]
+enum Admission
+    Pause | Refuse
+class Listener
+    def start[M, E](self: &mut Listener, context: &mut Context[M, E]) -> Result[(), NetError]
+    def handle[M, E](self: &mut Listener, mail: &Mail[M, E], context: &mut Context[M, E]) -> Result[bool, NetError]
+    def accept(self) -> Result[Option[Connection], NetError | BytesError]
+    def live(self) -> i64
+    def refused(self) -> i64
+    def tag(self) -> i64
+    def local_address(self) -> Result[SocketAddress, NetError]
+def listener(socket: TcpListener, limits: Limits, capacity: i64, heap: i64, tag: i64, admission: Admission) -> Result[Listener, NetError]
+class Dialing
+    def handle[M, E](self: &mut Dialing, mail: &Mail[M, E], context: &mut Context[M, E]) -> Result[Option[TcpStream], NetError]
+    def abandon[M, E](self: &mut Dialing, context: &mut Context[M, E]) -> Result[(), NetError]
+def dial[M, E](address: &SocketAddress, timeout: &Duration, context: &mut Context[M, E]) -> Result[Dialing, NetError | TimerError]
+class Resolving
+    def handle[M, E](self: &mut Resolving, mail: &Mail[M, E], context: &mut Context[M, E]) -> Result[Option[list[SocketAddress]], NetError]
+    def abandon[M, E](self: &mut Resolving, context: &mut Context[M, E]) -> Result[(), NetError]
+def lookup[M, E](host: &str, port: u16, timeout: &Duration, context: &mut Context[M, E]) -> Result[Resolving, NetError | TimerError]
+```
+
+## `std.actor.tls`
+
+TLS for actor connections: a std.tls session over a `std.actor.net` connection, with plaintext back-pressure and the session in the connection actor's heap. Errors: `TlsError`, `TimerError`. [Reference](actor-tls.md).
+
+```text
+class TlsConnection
+    def start[M, E](self: &mut TlsConnection, context: &mut Context[M, E]) -> Result[(), TlsError | TimerError]
+    def handle[M, E](self: &mut TlsConnection, mail: &Mail[M, E], context: &mut Context[M, E]) -> Result[Events, TlsError | TimerError]
+    def input(self) -> &Bytes
+    def input_start(self) -> i64
+    def input_stop(self) -> i64
+    def available(self) -> i64
+    def consume[M, E](self: &mut TlsConnection, count: i64, context: &mut Context[M, E]) -> Result[(), TlsError | TimerError]
+    def pending(self) -> i64
+    def space(self) -> i64
+    def write[S: ByteSource, M, E](self: &mut TlsConnection, source: &S, start: i64, stop: i64, context: &mut Context[M, E]) -> Result[i64, TlsError | TimerError]
+    def forward[M, E](self: &mut TlsConnection, count: i64, context: &mut Context[M, E]) -> Result[i64, TlsError | TimerError]
+    def read_within[M, E](self: &mut TlsConnection, span: &Duration, context: &mut Context[M, E]) -> Result[(), TlsError | TimerError]
+    def clear_read_deadline(self: &mut TlsConnection) -> ()
+    def shutdown_write[M, E](self: &mut TlsConnection, context: &mut Context[M, E]) -> Result[(), TlsError | TimerError]
+    def close[M, E](self: &mut TlsConnection, context: &mut Context[M, E]) -> Result[(), TlsError]
+    def established(self) -> bool
+    def reading(self) -> bool
+    def closed(self) -> bool
+    def session(self) -> &Session
+    def connection(self) -> &Connection
+def over(net: Connection, session: Session, input: i64) -> Result[TlsConnection, TlsError]
+def server(net: Connection, config: &ServerConfig, input: i64) -> Result[TlsConnection, TlsError]
+def client(net: Connection, config: &ClientConfig, server_name: &str, input: i64) -> Result[TlsConnection, TlsError]
+```
+
+## `std.archive`
+
+TAR and ZIP readers and writers over `std.io`, and extraction into a new directory under explicit path, link, and size limits. Errors: `ArchiveError`. [Reference](archive.md).
+
+```text
+enum ArchiveError
+    Stream(StreamError) | Io(IoError) | Fs(FsError) | Allocation(AllocError) | Corrupt | Checksum | Truncated | Unsupported | UnsafePath | Link | Special | Duplicate | Exists | Limit | Cancelled | InvalidInput
+enum EntryKind
+    File | Directory | Symlink | Hardlink | Other
+class Entry
+    name: Path
+    kind: EntryKind
+    size: i64
+    compressed: i64
+    mode: i64
+    mtime: i64
+    link: Path
+class Policy
+    max_entries: i64
+    max_entry_size: i64
+    max_total_size: i64
+    max_ratio: i64
+    max_depth: i64
+    max_name: i64
+    skip_links: bool
+    skip_special: bool
+def policy() -> Policy
+class Summary
+    entries: i64
+    files: i64
+    bytes: i64
+    skipped: i64
+def stream_error(error: ArchiveError) -> StreamError
+class TarReader[R]
+    inner: R
+    def failure(self) -> Option[ArchiveError]
+    def next(self: &mut TarReader[R]) -> Result[Option[Entry], ArchiveError]
+    def read(self: &mut TarReader[R], buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StreamError]
+def tar_reader[R](inner: R) -> Result[TarReader[R], ArchiveError]
+class TarWriter[W]
+    inner: W
+    def add_file(self: &mut TarWriter[W], name: &Path, data: &Bytes, mode: i64, mtime: i64) -> Result[(), ArchiveError]
+    def add_from[S](self: &mut TarWriter[W], name: &Path, size: i64, source: &mut S, mode: i64, mtime: i64) -> Result[(), ArchiveError]
+    def add_dir(self: &mut TarWriter[W], name: &Path, mode: i64, mtime: i64) -> Result[(), ArchiveError]
+    def add_symlink(self: &mut TarWriter[W], name: &Path, target: &Path, mtime: i64) -> Result[(), ArchiveError]
+    def finish(self: &mut TarWriter[W]) -> Result[(), ArchiveError]
+def tar_writer[W](inner: W) -> Result[TarWriter[W], ArchiveError]
+class ZipReader[R]
+    inner: R
+    def len(self) -> i64
+    def entries(self) -> &list[Entry]
+    def failure(self) -> Option[ArchiveError]
+    def open(self: &mut ZipReader[R], index: i64) -> Result[(), ArchiveError]
+    def read(self: &mut ZipReader[R], buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StreamError]
+def zip_reader[R](inner: R, max_entries: i64) -> Result[ZipReader[R], ArchiveError]
+enum Method
+    Stored | Deflate
+class ZipWriter[W]
+    inner: W
+    def add_file(self: &mut ZipWriter[W], name: &Path, data: &Bytes, method: Method, mode: i64, mtime: i64) -> Result[(), ArchiveError]
+    def add_dir(self: &mut ZipWriter[W], name: &Path, mode: i64, mtime: i64) -> Result[(), ArchiveError]
+    def add_symlink(self: &mut ZipWriter[W], name: &Path, target: &Path, mtime: i64) -> Result[(), ArchiveError]
+    def finish(self: &mut ZipWriter[W]) -> Result[(), ArchiveError]
+def zip_writer[W](inner: W) -> Result[ZipWriter[W], ArchiveError]
+def extract_tar[R](archive: &mut TarReader[R], parent: &Root, destination: &Path, policy: &Policy, cancel: &CancellationToken) -> Result[Summary, ArchiveError]
+def extract_zip[R](archive: &mut ZipReader[R], parent: &Root, destination: &Path, policy: &Policy, cancel: &CancellationToken) -> Result[Summary, ArchiveError]
+```
+
+## `std.atomic`
+
+Inline atomic integers and booleans with compile-time checked orderings, and fences. [Reference](atomic.md).
+
+Compiler-provided: `Atomic`, `fence`. Their signatures are on the reference page.
+
+```text
+enum Ordering
+    Relaxed | Release | Acquire | AcqRel | SeqCst
+```
+
+## `std.bytes`
+
+Compact owning byte buffers with checked ranges, explicit copies and validated text conversion. Errors: `BytesError`. [Reference](bytes.md).
+
+```text
+enum BytesError
+    OutOfRange | InvalidUtf8 | Allocation(AllocError)
+protocol ByteSource
+    def len(self) -> i64
+class Bytes
+    def len(self) -> i64
+    def is_empty(self) -> bool
+    def write_float(self: &mut Bytes, value: f64) -> Result[i64, BytesError]
+    def write_float_spec(self: &mut Bytes, value: f64, style: i64, precision: i64, offset: i64) -> Result[i64, BytesError]
+    def capacity(self) -> i64
+    def get(self, index: i64) -> Result[u8, BytesError]
+    def set(self: &mut Bytes, index: i64, value: u8) -> Result[(), BytesError]
+    def push(self: &mut Bytes, value: u8) -> Result[(), BytesError]
+    def pop(self: &mut Bytes) -> Option[u8]
+    def reserve(self: &mut Bytes, additional: i64) -> Result[(), BytesError]
+    def resize(self: &mut Bytes, count: i64, fill: u8) -> Result[(), BytesError]
+    def truncate(self: &mut Bytes, count: i64) -> Result[(), BytesError]
+    def clear(self: &mut Bytes) -> ()
+    def fill(self: &mut Bytes, start: i64, stop: i64, value: u8) -> Result[(), BytesError]
+    def extend[S: ByteSource](self: &mut Bytes, source: &S) -> Result[(), BytesError]
+    def extend_range[S: ByteSource](self: &mut Bytes, source: &S, start: i64, stop: i64) -> Result[(), BytesError]
+    def overwrite[S: ByteSource](self: &mut Bytes, offset: i64, source: &S, start: i64, stop: i64) -> Result[(), BytesError]
+    def copy_within(self: &mut Bytes, start: i64, stop: i64, to: i64) -> Result[(), BytesError]
+    def slice(self, start: i64, stop: i64) -> Result[Bytes, BytesError]
+    def copy(self) -> Result[Bytes, BytesError]
+    def find(self, value: u8, start: i64, stop: i64) -> Result[Option[i64], BytesError]
+    def find_in[S: ByteSource](self, set: &S, start: i64, stop: i64) -> Result[Option[i64], BytesError]
+    def find_not_in[S: ByteSource](self, set: &S, start: i64, stop: i64) -> Result[Option[i64], BytesError]
+    def find_bytes[S: ByteSource](self, needle: &S, start: i64, stop: i64) -> Result[Option[i64], BytesError]
+    def count(self, value: u8, start: i64, stop: i64) -> Result[i64, BytesError]
+    def matches[S: ByteSource](self, offset: i64, source: &S, start: i64, stop: i64) -> Result[bool, BytesError]
+    def matches_text(self, offset: i64, text: &str) -> Result[bool, BytesError]
+    def ascii_run(self, start: i64, stop: i64) -> Result[i64, BytesError]
+    def utf8_run(self, start: i64, stop: i64) -> Result[i64, BytesError]
+    def to_list(self) -> Result[list[u8], BytesError]
+    def to_text(self) -> Result[str, BytesError]
+    def to_text_range(self, start: i64, stop: i64) -> Result[str, BytesError]
+    def read_file(self: &mut Bytes, file: &mut File, start: i64, stop: i64) -> Result[i64, IoError]
+    def write_file(self, file: &mut File, start: i64, stop: i64) -> Result[i64, IoError]
+    def read_stdin(self: &mut Bytes, start: i64, stop: i64) -> Result[i64, IoError]
+    def write_stdout(self, start: i64, stop: i64) -> Result[i64, IoError]
+    def write_stderr(self, start: i64, stop: i64) -> Result[i64, IoError]
+    def read_os_entropy(self: &mut Bytes, start: i64, stop: i64) -> Result[i64, IoError]
+    def crypto_update(self: &mut Bytes, data: &Bytes, start: i64, stop: i64) -> Result[bool, BytesError]
+    def crypto_update_text(self: &mut Bytes, text: &str) -> bool
+    def crypto_finish(self: &mut Bytes, target: &mut Bytes, offset: i64, size: i64) -> Result[bool, BytesError]
+    def crypto_verify(self: &mut Bytes, expected: &Bytes, start: i64, stop: i64) -> Result[i64, BytesError]
+    def crypto_equal(self, other: &Bytes) -> bool
+    def compress_step[S: ByteSource](self: &mut Bytes, input: &S, start: i64, stop: i64) -> Result[i64, BytesError]
+    def compress_flush(self: &mut Bytes, mode: i64) -> i64
+    def compress_ended(self) -> bool
+    def compress_restart(self: &mut Bytes) -> bool
+    def compress_crc32(self, seed: i64, start: i64, stop: i64) -> Result[i64, BytesError]
+    def sqlite_bind(self, statement: &ByteStorage, index: i64) -> i64
+    def net_receive_from(self: &mut Bytes, socket: &mut File, start: i64, stop: i64, sender: &mut Bytes) -> Result[i64, IoError]
+    def ready_select(self: &mut Bytes, selector: &File, timeout: u64, cancel: &CancellationToken) -> Result[i64, IoError]
+    def tls_feed(self, session: &ByteStorage, start: i64, stop: i64) -> Result[i64, BytesError]
+    def tls_take(self: &mut Bytes, session: &ByteStorage, start: i64, stop: i64) -> Result[i64, BytesError]
+    def tls_read(self: &mut Bytes, session: &ByteStorage, start: i64, stop: i64) -> Result[i64, BytesError]
+    def tls_detail(self: &mut Bytes, session: &ByteStorage, which: i64) -> i64
+def empty() -> Result[Bytes, BytesError]
+def with_capacity(capacity: i64) -> Result[Bytes, BytesError]
+def from_list(values: &list[u8]) -> Result[Bytes, BytesError]
+def from_text(text: &str) -> Result[Bytes, BytesError]
+def from_bytes(value: bytes) -> Result[Bytes, BytesError]
+def crypto_state(kind: u8) -> Result[Bytes, BytesError]
+def crypto_derive_state(context: &str) -> Result[Bytes, BytesError]
+def crypto_keyed_state(kind: u8, key: &Bytes, start: i64, stop: i64) -> Result[Bytes, BytesError]
+def compress_state(kind: u8, level: i64, capacity: i64) -> Result[Bytes, BytesError]
+def sqlite_column(statement: &ByteStorage, column: i64) -> Result[Bytes, BytesError]
+def crypto_aes_seal(key: &Bytes, nonce: &Bytes, aad: &Bytes, target: &mut Bytes) -> i64
+def crypto_aes_open(key: &Bytes, nonce: &Bytes, aad: &Bytes, target: &mut Bytes) -> i64
+def crypto_chacha_seal(key: &Bytes, nonce: &Bytes, aad: &Bytes, target: &mut Bytes) -> i64
+def crypto_chacha_open(key: &Bytes, nonce: &Bytes, aad: &Bytes, target: &mut Bytes) -> i64
+def crypto_ed_public(seed: &Bytes, target: &mut Bytes) -> i64
+def crypto_ed_sign(seed: &Bytes, message: &Bytes, target: &mut Bytes) -> i64
+def crypto_ed_verify(key: &Bytes, message: &Bytes, signature: &Bytes) -> i64
+def crypto_hkdf(salt: &Bytes, key: &Bytes, info: &Bytes, target: &mut Bytes) -> i64
+def crypto_x_public(state: &Bytes, target: &mut Bytes) -> i64
+def crypto_x_agree(state: &mut Bytes, peer: &Bytes, target: &mut Bytes) -> i64
+def crypto_x_new() -> Result[Bytes, BytesError]
+def crypto_key_new() -> Result[Bytes, BytesError]
+def crypto_rsa_load(state: &mut Bytes, der: &Bytes) -> i64
+def crypto_p256_load(state: &mut Bytes, der: &Bytes) -> i64
+def crypto_key_size(state: &Bytes, which: i64) -> i64
+def crypto_key_public(state: &Bytes, target: &mut Bytes) -> i64
+def crypto_key_sign(state: &Bytes, scheme: i64, message: &Bytes, target: &mut Bytes) -> i64
+def crypto_rsa_verify(key: &Bytes, scheme: i64, message: &Bytes, signature: &Bytes) -> i64
+def crypto_p256_verify(point: &Bytes, message: &Bytes, signature: &Bytes) -> i64
+def crypto_p256_check(point: &Bytes) -> i64
+```
+
+## `std.cache.lru`
+
+Fixed-capacity caches that evict the least recently used entry, with constant-time lookup, promotion and eviction. Errors: `AllocError`. [Reference](cache-lru.md).
+
+```text
+class LruCache[K, V]
+    def __init__(self, capacity: i64) -> Result[(), AllocError]
+    def capacity(self) -> i64
+    def len(self) -> i64
+    def is_empty(self) -> bool
+    def contains(self, key: &K) -> bool
+    def get(self: &mut LruCache[K, V], key: &K) -> Option[V]
+    def peek(self, key: &K) -> Option[V]
+    def get_ref(self: &mut LruCache[K, V], key: &K) -> Option[&V]
+    def get_mut(self: &mut LruCache[K, V], key: &K) -> Option[&mut V]
+    def peek_ref(self, key: &K) -> Option[&V]
+    def peek_mut(self: &mut LruCache[K, V], key: &K) -> Option[&mut V]
+    def promote(self: &mut LruCache[K, V], key: &K) -> bool
+    def put(self: &mut LruCache[K, V], key: K, value: V) -> Result[Option[(K, V)], AllocError]
+    def remove(self: &mut LruCache[K, V], key: &K) -> Option[V]
+    def pop_lru(self: &mut LruCache[K, V]) -> Option[(K, V)]
+    def clear(self: &mut LruCache[K, V]) -> ()
+```
+
+## `std.channel`
+
+Bounded channels, endpoints and selection. Errors: Channel/send/receive/selection errors. [Reference](channel.md).
+
+Compiler-provided: `channel`, `Sender`, `Receiver`, `ChannelError`, `SendError`, `RecvError`, `SendTimeoutError`, `RecvTimeoutError`, `Selected`, `SelectError`, `select_recv`, `select_recv_nowait`, `select_recv_timeout`. Their signatures are on the reference page.
+
+## `std.cli`
+
+Explicit typed options/positionals, repeatable values, generated help and lossless path arguments. Errors: `CliError`. [Reference](cli.md).
+
+```text
+enum Kind
+    Flag | Integer | Text | Path
+class Spec
+    name: str
+    kind: Kind
+    positional: bool
+    required: bool
+    repeatable: bool
+    help: str
+enum Value
+    Flag | Integer(i64) | Text(str) | Path(Path)
+class Entry
+    spec: i64
+    value: Value
+class Parsed
+    help_requested: bool
+    entries: list[Entry]
+enum CliError
+    Schema(i64) | UnknownOption(i64) | UnexpectedArgument(i64) | MissingValue(i64) | Duplicate(i64) | Missing(i64) | InvalidInteger(i64) | InvalidUtf8(i64) | Allocation(AllocError)
+def validate(schema: &list[Spec]) -> Result[(), CliError]
+def parse(schema: &list[Spec], arguments: &list[list[u8]], start: i64) -> Result[Parsed, CliError]
+def help(schema: &list[Spec], program: &str) -> Result[str, CliError]
+def exit_status(error: &CliError) -> i32
+def describe(error: &CliError) -> Result[str, AllocError]
+def describe_for(error: &CliError, schema: &list[Spec]) -> Result[str, AllocError]
+```
+
+## `std.cli.fileinput`
+
+Buffered fallible UTF-8 lines across native paths or command-line files, with stdin fallback. Errors: `FileInputError`. [Reference](cli-fileinput.md).
+
+```text
+enum FileInputError
+    Open(Option[Path], StreamError) | Read(Option[Path], StreamError) | Text(Option[Path], BytesError) | Close(Option[Path], StreamError)
+def files(paths: list[Path]) -> Generator[Result[str, FileInputError]]
+def lines() -> Result[Generator[Result[str, FileInputError]], IoError | AllocError]
+```
+
+## `std.cli.progress`
+
+Terminal-only stderr bars and spinners with counts, rates, ETA and throttled redraws. Errors: `ProgressError`. [Reference](cli-progress.md).
+
+```text
+enum ProgressError
+    InvalidPosition | Finished | Output(FormatError)
+class Progress
+    def position(self) -> u64
+    def total(self) -> Option[u64]
+    def is_finished(self) -> bool
+    def rate(self, now: &Instant) -> Option[f64]
+    def eta(self, now: &Instant) -> Option[f64]
+    def render(self, now: &Instant, output: &mut Formatter) -> Result[(), FormatError]
+    def set_position_at(self: &mut Progress, position: u64, now: &Instant) -> Result[(), ProgressError]
+    def set_position(self: &mut Progress, position: u64) -> Result[(), ProgressError]
+    def advance(self: &mut Progress, count: u64 = 1u64) -> Result[(), ProgressError]
+    def tick(self: &mut Progress) -> Result[(), ProgressError]
+    def finish_at(self: &mut Progress, now: &Instant) -> Result[(), ProgressError]
+    def finish(self: &mut Progress) -> Result[(), ProgressError]
+def bar_at(total: u64, now: &Instant) -> Progress
+def bar(total: u64) -> Progress
+def spinner_at(now: &Instant) -> Progress
+def spinner() -> Progress
+```
+
+## `std.collections`
+
+Owned binary heaps ordered by `<` or by a stored comparator. Errors: `AllocError`. [Reference](collections.md).
+
+```text
+class Heap[T]
+    def __init__(self) -> Result[(), AllocError]
+    def len(self) -> i64
+    def is_empty(self) -> bool
+    def reserve(self: &mut Heap[T], additional: i64) -> Result[(), AllocError]
+    def peek(self) -> Option[T]
+    def peek_ref(self) -> Option[&T]
+    def push(self: &mut Heap[T], value: T) -> Result[(), AllocError]
+    def pop(self: &mut Heap[T]) -> Option[T]
+    def clear(self: &mut Heap[T]) -> ()
+class HeapBy[T, F: Callable[[&T, &T], bool]]
+    def __init__(self, before: F) -> Result[(), AllocError]
+    def len(self) -> i64
+    def is_empty(self) -> bool
+    def reserve(self: &mut HeapBy[T, F], additional: i64) -> Result[(), AllocError]
+    def peek(self) -> Option[T]
+    def peek_ref(self) -> Option[&T]
+    def push(self: &mut HeapBy[T, F], value: T) -> Result[(), AllocError]
+    def pop(self: &mut HeapBy[T, F]) -> Option[T]
+    def clear(self: &mut HeapBy[T, F]) -> ()
+def drain[T](heap: Heap[T]) -> Generator[T]
+def drain_by[T, F: Callable[[&T, &T], bool]](heap: HeapBy[T, F]) -> Generator[T]
+```
+
+## `std.complex`
+
+`Complex` numbers over `f64` with arithmetic operators, polar form, `exp`, `log`, `sqrt`, `pow`, and `a+bi` display. [Reference](complex.md).
+
+```text
+class Complex
+    re: f64
+    im: f64
+    def __add__(self, other: &Complex) -> Complex
+    def __sub__(self, other: &Complex) -> Complex
+    def __mul__(self, other: &Complex) -> Complex
+    def __truediv__(self, other: &Complex) -> Complex
+    def __neg__(self) -> Complex
+    def scale(self, factor: f64) -> Complex
+    def conj(self) -> Complex
+    def norm(self) -> f64
+    def abs(self) -> f64
+    def arg(self) -> f64
+    def to_polar(self) -> (f64, f64)
+    def exp(self) -> Complex
+    def log(self) -> Complex
+    def sqrt(self) -> Complex
+    def pow(self, exponent: &Complex) -> Complex
+    def powi(self, n: i64) -> Complex
+    def display[W](self, out: &mut Formatter[W]) -> Result[(), FormatError]
+def from_polar(r: f64, theta: f64) -> Complex
+```
+
+## `std.compress`
+
+Bounded gzip, zlib, DEFLATE and Brotli compression of buffers and `std.io` streams, and CRC-32. Errors: `CompressError`. [Reference](compress.md).
+
+```text
+enum Format
+    Deflate | Zlib | Gzip | Brotli
+enum CompressError
+    OutOfRange | Corrupt | Checksum | Truncated | TrailingData | LimitExceeded | Allocation(AllocError)
+def stream_error(error: CompressError) -> StreamError
+class Inflater
+    def step(self: &mut Inflater, input: &Bytes, start: i64, stop: i64) -> Result[i64, CompressError]
+    def complete(self) -> bool
+    def output(self) -> &Bytes
+    def clear(self: &mut Inflater) -> ()
+def inflater(format: Format, limit: i64) -> Result[Inflater, CompressError]
+def compress(format: Format, data: &Bytes, level: i64) -> Result[Bytes, CompressError]
+def decompress(format: Format, data: &Bytes, limit: i64) -> Result[Bytes, CompressError]
+def crc32(seed: i64, data: &Bytes, start: i64, stop: i64) -> Result[i64, CompressError]
+class Compressor[W]
+    inner: W
+    def write[S: ByteSource](self: &mut Compressor[W], source: &S, start: i64, stop: i64) -> Result[i64, StreamError]
+    def flush(self: &mut Compressor[W]) -> Result[(), StreamError]
+    def finish(self: &mut Compressor[W]) -> Result[(), StreamError]
+def compressor[W](format: Format, inner: W, level: i64) -> Result[Compressor[W], CompressError]
+class Decompressor[R]
+    inner: R
+    def failure(self) -> Option[CompressError]
+    def read(self: &mut Decompressor[R], buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StreamError]
+def decompressor[R](format: Format, inner: R, limit: i64) -> Result[Decompressor[R], CompressError]
+```
+
+## `std.concurrent`
+
+Executors, futures and parallel operations. Errors: Pool/submission/future/parallel errors. [Reference](concurrent.md).
+
+Compiler-provided: `ThreadPoolExecutor`, `Future`, `PoolError`, `SubmitError`, `FutureError`, `PoolMapError`, `ParallelError`. Their signatures are on the reference page.
+
+## `std.crypto`
+
+Digests, HMAC, BLAKE3 hashing/key derivation, constant-time comparison, AEAD encryption, Ed25519, X25519, and HKDF over `std.bytes`. Errors: `CryptoError`, `AdvancedError`. [Reference](crypto.md).
+
+```text
+enum CryptoError
+    OutOfRange | Finished | InvalidKeyLength | UnsupportedAlgorithm | Allocation(AllocError)
+enum Algorithm
+    Sha256 | Sha512 | Sha1 | Blake3
+def output_size(algorithm: Algorithm) -> i64
+class Digest
+    def size(self) -> i64
+    def update(self: &mut Digest, data: &Bytes, start: i64, stop: i64) -> Result[(), CryptoError]
+    def update_text(self: &mut Digest, text: &str) -> Result[(), CryptoError]
+    def finish(self: &mut Digest) -> Result[Bytes, CryptoError]
+    def finish_into(self: &mut Digest, target: &mut Bytes, offset: i64) -> Result[(), CryptoError]
+class Mac
+    def size(self) -> i64
+    def update(self: &mut Mac, data: &Bytes, start: i64, stop: i64) -> Result[(), CryptoError]
+    def update_text(self: &mut Mac, text: &str) -> Result[(), CryptoError]
+    def finish(self: &mut Mac) -> Result[Bytes, CryptoError]
+    def finish_into(self: &mut Mac, target: &mut Bytes, offset: i64) -> Result[(), CryptoError]
+    def verify(self: &mut Mac, expected: &Bytes, start: i64, stop: i64) -> Result[bool, CryptoError]
+def digest(algorithm: Algorithm) -> Result[Digest, CryptoError]
+def hmac(algorithm: Algorithm, key: &Bytes) -> Result[Mac, CryptoError]
+def sha256(data: &Bytes) -> Result[Bytes, CryptoError]
+def sha512(data: &Bytes) -> Result[Bytes, CryptoError]
+def blake3(data: &Bytes) -> Result[Bytes, CryptoError]
+def blake3_keyed_hasher(key: &Bytes) -> Result[Mac, CryptoError]
+def blake3_keyed(key: &Bytes, data: &Bytes) -> Result[Bytes, CryptoError]
+def blake3_derive_hasher(context: &str) -> Result[Digest, CryptoError]
+def blake3_derive_key(context: &str, key_material: &Bytes) -> Result[Bytes, CryptoError]
+def sha1(data: &Bytes) -> Result[Bytes, CryptoError]
+def hmac_sha256(key: &Bytes, data: &Bytes) -> Result[Bytes, CryptoError]
+def hmac_sha512(key: &Bytes, data: &Bytes) -> Result[Bytes, CryptoError]
+def equal(a: &Bytes, b: &Bytes) -> bool
+enum AdvancedError
+    InvalidLength | AuthenticationFailed | InvalidPeer | Finished | RandomFailure | InvalidKey | WeakKey | SmallOrderKey | Allocation(AllocError)
+    def format(self, output: &mut Formatter) -> Result[(), FormatError]
+enum AeadAlgorithm
+    Aes256Gcm | ChaCha20Poly1305
+def seal_in_place(algorithm: AeadAlgorithm, key: &Bytes, nonce: &Bytes, aad: &Bytes, data: &mut Bytes) -> Result[(), AdvancedError]
+def open_in_place(algorithm: AeadAlgorithm, key: &Bytes, nonce: &Bytes, aad: &Bytes, data: &mut Bytes) -> Result[(), AdvancedError]
+def ed25519_public_key_into(seed: &Bytes, target: &mut Bytes) -> Result[(), AdvancedError]
+def ed25519_public_key(seed: &Bytes) -> Result[Bytes, AdvancedError]
+def ed25519_sign_into(seed: &Bytes, message: &Bytes, target: &mut Bytes) -> Result[(), AdvancedError]
+def ed25519_sign(seed: &Bytes, message: &Bytes) -> Result[Bytes, AdvancedError]
+def ed25519_verify(public_key: &Bytes, message: &Bytes, signature: &Bytes) -> Result[bool, AdvancedError]
+def hkdf_sha256_into(salt: &Bytes, key_material: &Bytes, info: &Bytes, target: &mut Bytes) -> Result[(), AdvancedError]
+def hkdf_sha256(salt: &Bytes, key_material: &Bytes, info: &Bytes, size: i64) -> Result[Bytes, AdvancedError]
+class X25519Key
+    def public_key_into(self, target: &mut Bytes) -> Result[(), AdvancedError]
+    def public_key(self) -> Result[Bytes, AdvancedError]
+    def agree_into(self: &mut X25519Key, peer_public_key: &Bytes, target: &mut Bytes) -> Result[(), AdvancedError]
+    def agree(self: &mut X25519Key, peer_public_key: &Bytes) -> Result[Bytes, AdvancedError]
+def x25519() -> Result[X25519Key, AdvancedError]
+enum RsaScheme
+    Pkcs1Sha256 | Pkcs1Sha384 | Pkcs1Sha512 | PssSha256 | PssSha384 | PssSha512
+class RsaPublicKey
+    def signature_size(self) -> i64
+    def verify(self, scheme: RsaScheme, message: &Bytes, signature: &Bytes) -> Result[bool, AdvancedError]
+class RsaPrivateKey
+    def signature_size(self) -> i64
+    def public_key(self) -> Result[RsaPublicKey, AdvancedError]
+    def sign_into(self, scheme: RsaScheme, message: &Bytes, target: &mut Bytes) -> Result[(), AdvancedError]
+    def sign(self, scheme: RsaScheme, message: &Bytes) -> Result[Bytes, AdvancedError]
+class P256PublicKey
+    def verify(self, message: &Bytes, signature: &Bytes) -> Result[bool, AdvancedError]
+class P256PrivateKey
+    def public_key(self) -> Result[P256PublicKey, AdvancedError]
+    def sign_into(self, message: &Bytes, target: &mut Bytes) -> Result[(), AdvancedError]
+    def sign(self, message: &Bytes) -> Result[Bytes, AdvancedError]
+def rsa_public_key_from_spki(der: &Bytes) -> Result[RsaPublicKey, AdvancedError]
+def rsa_public_key_from_components(n: &Bytes, e: &Bytes) -> Result[RsaPublicKey, AdvancedError]
+def rsa_private_key_from_pkcs8(der: &Bytes) -> Result[RsaPrivateKey, AdvancedError]
+def p256_public_key_from_point(point: &Bytes) -> Result[P256PublicKey, AdvancedError]
+def p256_public_key_from_coordinates(x: &Bytes, y: &Bytes) -> Result[P256PublicKey, AdvancedError]
+def p256_public_key_from_spki(der: &Bytes) -> Result[P256PublicKey, AdvancedError]
+def p256_private_key_from_pkcs8(der: &Bytes) -> Result[P256PrivateKey, AdvancedError]
+def ed25519_public_key_from_spki(der: &Bytes) -> Result[Bytes, AdvancedError]
+def ed25519_seed_from_pkcs8(der: &Bytes) -> Result[Bytes, AdvancedError]
+```
+
+## `std.csv`
+
+Streaming CSV readers and writers over `std.io` with explicit dialects, size limits, and positioned errors. Errors: `CsvError`. [Reference](csv.md).
+
+```text
+enum Fault
+    BareQuote | AfterQuote | UnterminatedQuote | FieldTooLong | RecordTooLong | TooManyFields
+class Position
+    record: i64
+    field: i64
+    line: i64
+    offset: i64
+enum CsvError
+    Invalid(Fault, Position) | Rejected(Fault, i64, i64) | Width(i64, i64, i64) | EmptyRecord(i64) | InvalidUtf8(i64, i64) | InvalidDialect | OutOfRange | Stopped | Stream(StreamError) | Allocation(AllocError)
+enum Width
+    Any | First | Exactly(i64)
+enum Newline
+    Lf | CrLf
+enum Quoting
+    Needed | Always
+class Dialect
+    delimiter: u8
+    quote: u8
+    newline: Newline
+    quoting: Quoting
+    width: Width
+    skip_bom: bool
+    max_field: i64
+    max_record: i64
+    max_fields: i64
+def rfc4180() -> Dialect
+class Record
+    def len(self) -> i64
+    def number(self) -> i64
+    def line(self) -> i64
+    def data(self) -> &Bytes
+    def start(self, index: i64) -> Result[i64, CsvError]
+    def stop(self, index: i64) -> Result[i64, CsvError]
+    def bytes(self, index: i64) -> Result[Bytes, CsvError]
+    def append_to(self, index: i64, out: &mut Bytes) -> Result[(), CsvError]
+    def text(self, index: i64) -> Result[str, CsvError]
+    def texts(self) -> Result[list[str], CsvError]
+    def clear(self: &mut Record) -> ()
+def record() -> Result[Record, CsvError]
+class Reader[R]
+    inner: R
+    def records(self) -> i64
+    def line(self) -> i64
+    def offset(self) -> i64
+    def read(self: &mut Reader[R], record: &mut Record) -> Result[bool, CsvError]
+def reader[R](inner: R, dialect: &Dialect, capacity: i64) -> Result[Reader[R], CsvError]
+class Writer[W]
+    inner: W
+    def records(self) -> i64
+    def pending(self) -> i64
+    def field(self: &mut Writer[W], source: &Bytes, start: i64, stop: i64) -> Result[(), CsvError]
+    def text(self: &mut Writer[W], value: &str) -> Result[(), CsvError]
+    def discard(self: &mut Writer[W]) -> ()
+    def end_record(self: &mut Writer[W]) -> Result[(), CsvError]
+    def record(self: &mut Writer[W], record: &Record) -> Result[(), CsvError]
+    def texts(self: &mut Writer[W], fields: &list[str]) -> Result[(), CsvError]
+    def flush(self: &mut Writer[W]) -> Result[(), CsvError]
+def writer[W](inner: W, dialect: &Dialect) -> Result[Writer[W], CsvError]
+```
+
+## `std.dataframe`
+
+Optional Polars analytical expression plans, typed nullable columns, schema inspection, grouping, and CSV/Parquet I/O. Errors: `DataFrameError`. [Reference](dataframe.md).
+
+```text
+enum TimeUnit
+    Milliseconds | Microseconds | Nanoseconds
+enum DType
+    I8 | I16 | I32 | U8 | U16 | U32 | U64 | F32 | I64 | F64 | Bool | String | Binary | Date | Datetime(TimeUnit, Option[str]) | List | Struct | Other(str)
+class Field
+    name: str
+    dtype: DType
+class SchemaNode
+    parent: i64
+    name: str
+    dtype: DType
+class ListParts
+    values: Column
+    offsets: list[i64]
+    valid: list[bool]
+class StructParts
+    fields: DataFrame
+    valid: list[bool]
+enum JoinKind
+    Inner | Left | Full | Semi | Anti
+enum AsOfStrategy
+    Backward | Forward | Nearest
+class SortKey
+    def __init__(self, expression: Expr, descending: bool = False, nulls_last: bool = True) -> ()
+enum DataFrameError
+    Schema(str) | Query(str) | Io(str) | NativePanic(str) | Null(str) | Bounds(str) | Allocation(AllocError) | Message(IoError)
+class Column
+    def len(self) -> Result[i64, DataFrameError]
+    def to_frame(self) -> Result[DataFrame, DataFrameError]
+    def list_parts(self) -> Result[ListParts, DataFrameError]
+    def struct_parts(self) -> Result[StructParts, DataFrameError]
+class DataFrame
+    def column(self, name: &str) -> Result[Column, DataFrameError]
+    def schema_tree(self) -> Result[list[SchemaNode], DataFrameError]
+    def height(self) -> Result[i64, DataFrameError]
+    def lazy(self) -> Result[Query, DataFrameError]
+    def write_parquet(self, path: &str) -> Result[(), DataFrameError]
+    def write_csv(self, path: &str, has_header: bool = True, separator: &str = ",", null_value: &str = "") -> Result[(), DataFrameError]
+    def get_date_days(self, name: &str, row: i64) -> Result[Option[i32], DataFrameError]
+    def get_datetime_ticks(self, name: &str, row: i64, unit: TimeUnit, utc: bool = False) -> Result[Option[i64], DataFrameError]
+    def values_date_days(self, name: &str) -> Result[list[i32], DataFrameError]
+    def values_date_days_nullable(self, name: &str) -> Result[list[Option[i32]], DataFrameError]
+    def values_datetime_ticks(self, name: &str, unit: TimeUnit, utc: bool = False) -> Result[list[i64], DataFrameError]
+    def values_datetime_ticks_nullable(self, name: &str, unit: TimeUnit, utc: bool = False) -> Result[list[Option[i64]], DataFrameError]
+    def get_i8(self, name: &str, row: i64) -> Result[Option[i8], DataFrameError]
+    def values_i8(self, name: &str) -> Result[list[i8], DataFrameError]
+    def values_i8_nullable(self, name: &str) -> Result[list[Option[i8]], DataFrameError]
+    def get_i16(self, name: &str, row: i64) -> Result[Option[i16], DataFrameError]
+    def values_i16(self, name: &str) -> Result[list[i16], DataFrameError]
+    def values_i16_nullable(self, name: &str) -> Result[list[Option[i16]], DataFrameError]
+    def get_i32(self, name: &str, row: i64) -> Result[Option[i32], DataFrameError]
+    def values_i32(self, name: &str) -> Result[list[i32], DataFrameError]
+    def values_i32_nullable(self, name: &str) -> Result[list[Option[i32]], DataFrameError]
+    def get_u8(self, name: &str, row: i64) -> Result[Option[u8], DataFrameError]
+    def values_u8(self, name: &str) -> Result[list[u8], DataFrameError]
+    def values_u8_nullable(self, name: &str) -> Result[list[Option[u8]], DataFrameError]
+    def get_u16(self, name: &str, row: i64) -> Result[Option[u16], DataFrameError]
+    def values_u16(self, name: &str) -> Result[list[u16], DataFrameError]
+    def values_u16_nullable(self, name: &str) -> Result[list[Option[u16]], DataFrameError]
+    def get_u32(self, name: &str, row: i64) -> Result[Option[u32], DataFrameError]
+    def values_u32(self, name: &str) -> Result[list[u32], DataFrameError]
+    def values_u32_nullable(self, name: &str) -> Result[list[Option[u32]], DataFrameError]
+    def get_u64(self, name: &str, row: i64) -> Result[Option[u64], DataFrameError]
+    def values_u64(self, name: &str) -> Result[list[u64], DataFrameError]
+    def values_u64_nullable(self, name: &str) -> Result[list[Option[u64]], DataFrameError]
+    def get_f32(self, name: &str, row: i64) -> Result[Option[f32], DataFrameError]
+    def values_f32(self, name: &str) -> Result[list[f32], DataFrameError]
+    def values_f32_nullable(self, name: &str) -> Result[list[Option[f32]], DataFrameError]
+    def get_i64(self, name: &str, row: i64) -> Result[Option[i64], DataFrameError]
+    def values_i64(self, name: &str) -> Result[list[i64], DataFrameError]
+    def get_f64(self, name: &str, row: i64) -> Result[Option[f64], DataFrameError]
+    def values_f64(self, name: &str) -> Result[list[f64], DataFrameError]
+    def schema(self) -> Result[list[Field], DataFrameError]
+    def get_bool(self, name: &str, row: i64) -> Result[Option[bool], DataFrameError]
+    def get_binary(self, name: &str, row: i64) -> Result[Option[Bytes], DataFrameError]
+    def values_binary(self, name: &str) -> Result[list[Bytes], DataFrameError]
+    def values_binary_nullable(self, name: &str) -> Result[list[Option[Bytes]], DataFrameError]
+    def get_str(self, name: &str, row: i64) -> Result[Option[str], DataFrameError]
+    def values_bool(self, name: &str) -> Result[list[bool], DataFrameError]
+    def values_str(self, name: &str) -> Result[list[str], DataFrameError]
+    def values_str_nullable(self, name: &str) -> Result[list[Option[str]], DataFrameError]
+    def values_i64_nullable(self, name: &str) -> Result[list[Option[i64]], DataFrameError]
+    def values_f64_nullable(self, name: &str) -> Result[list[Option[f64]], DataFrameError]
+    def values_bool_nullable(self, name: &str) -> Result[list[Option[bool]], DataFrameError]
+class Expr
+    def list_len(self) -> Result[Expr, DataFrameError]
+    def list_get(self, index: i64) -> Result[Expr, DataFrameError]
+    def struct_field(self, name: &str) -> Result[Expr, DataFrameError]
+    def str_to_date(self, format: &str = "%Y-%m-%d", strict: bool = True) -> Result[Expr, DataFrameError]
+    def str_to_datetime(self, format: &str, unit: TimeUnit, utc: bool = False, strict: bool = True) -> Result[Expr, DataFrameError]
+    def dt_year(self) -> Result[Expr, DataFrameError]
+    def dt_month(self) -> Result[Expr, DataFrameError]
+    def dt_day(self) -> Result[Expr, DataFrameError]
+    def dt_hour(self) -> Result[Expr, DataFrameError]
+    def dt_minute(self) -> Result[Expr, DataFrameError]
+    def dt_second(self) -> Result[Expr, DataFrameError]
+    def dt_date(self) -> Result[Expr, DataFrameError]
+    def dt_format(self, format: &str) -> Result[Expr, DataFrameError]
+    def cast(self, dtype: DType, strict: bool = True) -> Result[Expr, DataFrameError]
+    def str_lower(self) -> Result[Expr, DataFrameError]
+    def str_upper(self) -> Result[Expr, DataFrameError]
+    def str_len(self) -> Result[Expr, DataFrameError]
+    def str_contains(self, pattern: &Expr) -> Result[Expr, DataFrameError]
+    def str_starts_with(self, prefix: &Expr) -> Result[Expr, DataFrameError]
+    def str_ends_with(self, suffix: &Expr) -> Result[Expr, DataFrameError]
+    def n_unique(self) -> Result[Expr, DataFrameError]
+    def over(self, partition_by: &list[Expr]) -> Result[Expr, DataFrameError]
+    def gt(self, other: &Expr) -> Result[Expr, DataFrameError]
+    def mul(self, other: &Expr) -> Result[Expr, DataFrameError]
+    def add(self, other: &Expr) -> Result[Expr, DataFrameError]
+    def sub(self, other: &Expr) -> Result[Expr, DataFrameError]
+    def div(self, other: &Expr) -> Result[Expr, DataFrameError]
+    def eq(self, other: &Expr) -> Result[Expr, DataFrameError]
+    def lt(self, other: &Expr) -> Result[Expr, DataFrameError]
+    def ge(self, other: &Expr) -> Result[Expr, DataFrameError]
+    def le(self, other: &Expr) -> Result[Expr, DataFrameError]
+    def and_(self, other: &Expr) -> Result[Expr, DataFrameError]
+    def or_(self, other: &Expr) -> Result[Expr, DataFrameError]
+    def fill_null(self, other: &Expr) -> Result[Expr, DataFrameError]
+    def sum(self) -> Result[Expr, DataFrameError]
+    def count(self) -> Result[Expr, DataFrameError]
+    def mean(self) -> Result[Expr, DataFrameError]
+    def min(self) -> Result[Expr, DataFrameError]
+    def max(self) -> Result[Expr, DataFrameError]
+    def is_null(self) -> Result[Expr, DataFrameError]
+    def alias(self, name: &str) -> Result[Expr, DataFrameError]
+class Query
+    def schema_tree(self) -> Result[list[SchemaNode], DataFrameError]
+    def schema(self) -> Result[list[Field], DataFrameError]
+    def filter(self, predicate: &Expr) -> Result[Query, DataFrameError]
+    def with_columns(self, expressions: &list[Expr]) -> Result[Query, DataFrameError]
+    def select(self, expressions: &list[Expr]) -> Result[Query, DataFrameError]
+    def group_by(self, keys: &list[Expr], aggregates: &list[Expr]) -> Result[Query, DataFrameError]
+    def collect(self) -> Result[DataFrame, DataFrameError]
+    def collect_streaming(self) -> Result[DataFrame, DataFrameError]
+    def sink_parquet(self, path: &str) -> Result[(), DataFrameError]
+    def join(self, other: &Query, left_keys: &list[Expr], right_keys: &list[Expr], how: JoinKind = JoinKind.Inner, suffix: &str = "_right", nulls_equal: bool = False) -> Result[Query, DataFrameError]
+    def join_asof(self, other: &Query, left_on: &str, right_on: &str, strategy: AsOfStrategy = AsOfStrategy.Backward, tolerance: Option[i64] = Nothing, allow_exact_matches: bool = True, suffix: &str = "_right") -> Result[Query, DataFrameError]
+    def sort(self, keys: &list[SortKey]) -> Result[Query, DataFrameError]
+    def slice(self, offset: i64, length: i64) -> Result[Query, DataFrameError]
+    def limit(self, count: i64) -> Result[Query, DataFrameError]
+def column_list(name: &str, values: &Column, offsets: &list[i64]) -> Result[Column, DataFrameError]
+def column_list_nullable(name: &str, values: &Column, offsets: &list[i64], valid: &list[bool]) -> Result[Column, DataFrameError]
+def column_struct(name: &str, fields: &DataFrame) -> Result[Column, DataFrameError]
+def column_struct_nullable(name: &str, fields: &DataFrame, valid: &list[bool]) -> Result[Column, DataFrameError]
+def frame(columns: &list[Column]) -> Result[DataFrame, DataFrameError]
+def column_i8(name: &str, values: &list[i8]) -> Result[Column, DataFrameError]
+def column_i8_nullable(name: &str, values: &list[Option[i8]]) -> Result[Column, DataFrameError]
+def lit_i8(value: i8) -> Result[Expr, DataFrameError]
+def column_i16(name: &str, values: &list[i16]) -> Result[Column, DataFrameError]
+def column_i16_nullable(name: &str, values: &list[Option[i16]]) -> Result[Column, DataFrameError]
+def lit_i16(value: i16) -> Result[Expr, DataFrameError]
+def column_i32(name: &str, values: &list[i32]) -> Result[Column, DataFrameError]
+def column_i32_nullable(name: &str, values: &list[Option[i32]]) -> Result[Column, DataFrameError]
+def lit_i32(value: i32) -> Result[Expr, DataFrameError]
+def column_u8(name: &str, values: &list[u8]) -> Result[Column, DataFrameError]
+def column_u8_nullable(name: &str, values: &list[Option[u8]]) -> Result[Column, DataFrameError]
+def lit_u8(value: u8) -> Result[Expr, DataFrameError]
+def column_u16(name: &str, values: &list[u16]) -> Result[Column, DataFrameError]
+def column_u16_nullable(name: &str, values: &list[Option[u16]]) -> Result[Column, DataFrameError]
+def lit_u16(value: u16) -> Result[Expr, DataFrameError]
+def column_u32(name: &str, values: &list[u32]) -> Result[Column, DataFrameError]
+def column_u32_nullable(name: &str, values: &list[Option[u32]]) -> Result[Column, DataFrameError]
+def lit_u32(value: u32) -> Result[Expr, DataFrameError]
+def column_u64(name: &str, values: &list[u64]) -> Result[Column, DataFrameError]
+def column_u64_nullable(name: &str, values: &list[Option[u64]]) -> Result[Column, DataFrameError]
+def lit_u64(value: u64) -> Result[Expr, DataFrameError]
+def column_f32(name: &str, values: &list[f32]) -> Result[Column, DataFrameError]
+def column_f32_nullable(name: &str, values: &list[Option[f32]]) -> Result[Column, DataFrameError]
+def lit_f32(value: f32) -> Result[Expr, DataFrameError]
+def column_i64(name: &str, values: &list[i64]) -> Result[Column, DataFrameError]
+def column_date(name: &str, days: &list[i32]) -> Result[Column, DataFrameError]
+def column_date_nullable(name: &str, days: &list[Option[i32]]) -> Result[Column, DataFrameError]
+def column_datetime(name: &str, ticks: &list[i64], unit: TimeUnit, utc: bool = False) -> Result[Column, DataFrameError]
+def column_datetime_nullable(name: &str, ticks: &list[Option[i64]], unit: TimeUnit, utc: bool = False) -> Result[Column, DataFrameError]
+def column_f64(name: &str, values: &list[f64]) -> Result[Column, DataFrameError]
+def col(name: &str) -> Result[Expr, DataFrameError]
+def lit(value: f64) -> Result[Expr, DataFrameError]
+def lit_i64(value: i64) -> Result[Expr, DataFrameError]
+def lit_str(value: &str) -> Result[Expr, DataFrameError]
+def lit_bool(value: bool) -> Result[Expr, DataFrameError]
+def lit_binary(value: &Bytes) -> Result[Expr, DataFrameError]
+def when(predicate: &Expr, then_value: &Expr, otherwise: &Expr) -> Result[Expr, DataFrameError]
+def null_f64() -> Result[Expr, DataFrameError]
+def scan_parquet(path: &str) -> Result[Query, DataFrameError]
+def scan_csv(path: &str, has_header: bool = True, separator: &str = ",", infer_rows: i64 = 100, null_value: Option[str] = Nothing, schema_overrides: Option[list[Field]] = Nothing) -> Result[Query, DataFrameError]
+def column_bool(name: &str, values: &list[bool]) -> Result[Column, DataFrameError]
+def column_binary(name: &str, values: &list[Bytes]) -> Result[Column, DataFrameError]
+def column_binary_nullable(name: &str, values: &list[Option[Bytes]]) -> Result[Column, DataFrameError]
+def column_str(name: &str, values: &list[str]) -> Result[Column, DataFrameError]
+def column_i64_nullable(name: &str, values: &list[Option[i64]]) -> Result[Column, DataFrameError]
+def column_f64_nullable(name: &str, values: &list[Option[f64]]) -> Result[Column, DataFrameError]
+def column_bool_nullable(name: &str, values: &list[Option[bool]]) -> Result[Column, DataFrameError]
+def column_str_nullable(name: &str, values: &list[Option[str]]) -> Result[Column, DataFrameError]
+```
+
+## `std.db.kv`
+
+Ordered byte-key maps, atomic transactions and bounded scans over a versioned SQLite store. Errors: `KvError`. [Reference](kv.md).
+
+```text
+enum Mode
+    ReadOnly | ReadWrite | Create
+enum KvError
+    Database(sqlite.DbError) | Allocation(AllocError) | InvalidName | InvalidLimit | ForeignDatabase | UnsupportedVersion(i64)
+const format_version: i64 = 1
+class Entry
+    key: Bytes
+    value: Bytes
+class Scan
+    def next(self: &mut Scan) -> Result[Option[Entry], KvError]
+class Transaction
+    def commit(self: &mut Transaction) -> Result[(), KvError]
+    def rollback(self: &mut Transaction) -> Result[(), KvError]
+class Store
+    def begin(self: &mut Store, immediate: bool = True) -> Result[Transaction, KvError]
+    def set_busy_timeout(self: &mut Store, milliseconds: i64) -> Result[(), KvError]
+    def close(self: &mut Store) -> Result[(), KvError]
+    def put(self: &mut Store, table: &str, key: &Bytes, value: &Bytes) -> Result[(), KvError]
+    def get(self: &mut Store, table: &str, key: &Bytes) -> Result[Option[Bytes], KvError]
+    def contains(self: &mut Store, table: &str, key: &Bytes) -> Result[bool, KvError]
+    def remove(self: &mut Store, table: &str, key: &Bytes) -> Result[bool, KvError]
+    def clear(self: &mut Store, table: &str) -> Result[i64, KvError]
+    def len(self: &mut Store, table: &str) -> Result[i64, KvError]
+    def scan(self: &mut Store, table: &str, start: &Bytes, stop: &Bytes, max_rows: i64, after: bool = False, reverse: bool = False) -> Result[Scan, KvError]
+    def scan_all(self: &mut Store, table: &str, max_rows: i64, reverse: bool = False) -> Result[Scan, KvError]
+def connect(path: &str, mode: Mode = Mode.Create, max_length: i64 = 1048576) -> Result[Store, KvError]
+def memory(max_length: i64 = 1048576) -> Result[Store, KvError]
+```
+
+## `std.db.sqlite`
+
+SQLite databases through prepared statements with typed parameters and reads, owned transactions that roll back on drop, and an explicit value-size limit. Errors: `DbError`. [Reference](sqlite.md).
+
+```text
+enum Mode
+    ReadOnly | ReadWrite | Create
+enum Begin
+    Deferred | Immediate | Exclusive
+enum ValueType
+    Integer | Real | Text | Blob | Null
+class SqliteError
+    code: i64
+    message: str
+    def primary(self) -> i64
+enum DbError
+    Sqlite(SqliteError) | Closed | InUse | EmptySql | TrailingSql | TransactionActive | TransactionFinished | InvalidPath | InvalidExtensionEntry | OutOfRange | NoRow | TypeMismatch(ValueType) | TooLarge | InvalidUtf8 | Allocation(AllocError)
+const error: i64 = 1
+const busy: i64 = 5
+const locked: i64 = 6
+const read_only: i64 = 8
+const cant_open: i64 = 14
+const constraint: i64 = 19
+const mismatch: i64 = 20
+const min_length_limit: i64 = 1024
+const max_length_limit: i64 = 1000000000
+class Connection
+    def execute(self: &mut Connection, sql: &str) -> Result[(), DbError]
+    def prepare(self: &mut Connection, sql: &str) -> Result[Statement, DbError]
+    def begin(self: &mut Connection, mode: Begin) -> Result[Transaction, DbError]
+    def changes(self) -> i64
+    def last_insert_rowid(self) -> i64
+    def set_busy_timeout(self: &mut Connection, milliseconds: i64) -> Result[(), DbError]
+    def load_extension(self: &mut Connection, path: &str, entrypoint: &str = "") -> Result[(), DbError]
+    def close(self: &mut Connection) -> Result[(), DbError]
+def connect(path: &str, mode: Mode, max_length: i64) -> Result[Connection, DbError]
+def memory(max_length: i64) -> Result[Connection, DbError]
+class Statement
+    def parameter_count(self) -> i64
+    def parameter_index(self, name: &str) -> Result[i64, DbError]
+    def bind_null(self: &mut Statement, index: i64) -> Result[(), DbError]
+    def bind_integer(self: &mut Statement, index: i64, value: i64) -> Result[(), DbError]
+    def bind_real(self: &mut Statement, index: i64, value: f64) -> Result[(), DbError]
+    def bind_text(self: &mut Statement, index: i64, value: &str) -> Result[(), DbError]
+    def bind_blob(self: &mut Statement, index: i64, value: &Bytes) -> Result[(), DbError]
+    def clear_bindings(self: &mut Statement) -> Result[(), DbError]
+    def step(self: &mut Statement) -> Result[bool, DbError]
+    def reset(self: &mut Statement) -> ()
+    def run(self: &mut Statement) -> Result[(), DbError]
+    def column_count(self) -> i64
+    def column_name(self, column: i64) -> Result[str, DbError]
+    def kind(self, column: i64) -> Result[ValueType, DbError]
+    def is_null(self, column: i64) -> Result[bool, DbError]
+    def integer(self, column: i64) -> Result[i64, DbError]
+    def real(self, column: i64) -> Result[f64, DbError]
+    def text(self, column: i64) -> Result[str, DbError]
+    def blob(self, column: i64) -> Result[Bytes, DbError]
+    def optional_integer(self, column: i64) -> Result[Option[i64], DbError]
+    def optional_real(self, column: i64) -> Result[Option[f64], DbError]
+    def optional_text(self, column: i64) -> Result[Option[str], DbError]
+    def optional_blob(self, column: i64) -> Result[Option[Bytes], DbError]
+class Transaction
+    def commit(self: &mut Transaction) -> Result[(), DbError]
+    def rollback(self: &mut Transaction) -> Result[(), DbError]
+```
+
+## `std.deque`
+
+Owned generic ring buffers with constant-time removal at either end. Errors: `AllocError`. [Reference](deque.md).
+
+```text
+class Deque[T]
+    def __init__(self) -> Result[(), AllocError]
+    def len(self) -> i64
+    def is_empty(self) -> bool
+    def append(self: &mut Deque[T], value: T) -> Result[(), AllocError]
+    def appendleft(self: &mut Deque[T], value: T) -> Result[(), AllocError]
+    def pop(self: &mut Deque[T]) -> Option[T]
+    def popleft(self: &mut Deque[T]) -> Option[T]
+    def clear(self: &mut Deque[T]) -> ()
+```
+
+## `std.diff`
+
+Line, word, character, byte, and list differences as edit operations, with Myers and patience algorithms and unified-diff output. Errors: `AllocError`. [Reference](diff.md).
+
+```text
+enum Algorithm
+    Myers | Patience
+enum Kind
+    Equal | Delete | Insert
+class Op
+    kind: Kind
+    old_start: i64
+    old_end: i64
+    new_start: i64
+    new_end: i64
+    def old_len(self) -> i64
+    def new_len(self) -> i64
+    def is_equal(self) -> bool
+def diff[T](old: &list[T], new: &list[T], algorithm: Algorithm = Algorithm.Myers, max_cost: Option[i64] = Nothing) -> Result[list[Op], AllocError]
+def diff_bytes(old: &Bytes, new: &Bytes, algorithm: Algorithm = Algorithm.Myers, max_cost: Option[i64] = Nothing) -> Result[list[Op], AllocError]
+class TextDiff
+    def ops(self) -> &list[Op]
+    def old_tokens(self) -> &list[str]
+    def new_tokens(self) -> &list[str]
+    def has_changes(self) -> bool
+    def unified(self, context: i64, old_name: &str, new_name: &str) -> Result[str, AllocError]
+def lines(old: &str, new: &str, algorithm: Algorithm = Algorithm.Myers, max_cost: Option[i64] = Nothing) -> Result[TextDiff, AllocError]
+def words(old: &str, new: &str, algorithm: Algorithm = Algorithm.Myers, max_cost: Option[i64] = Nothing) -> Result[TextDiff, AllocError]
+def chars(old: &str, new: &str, algorithm: Algorithm = Algorithm.Myers, max_cost: Option[i64] = Nothing) -> Result[TextDiff, AllocError]
+```
+
+## `std.encoding`
+
+Hex, base32/base64, MIME base64 and validated custom alphabets, plus fixed-width integer packing with explicit byte order, over `std.bytes`. Errors: `EncodingError`. [Reference](encoding.md).
+
+```text
+enum EncodingError
+    OutOfRange | InvalidLength | InvalidByte(i64) | InvalidPadding(i64) | NonCanonical(i64) | InvalidAlphabet | InvalidPem(i64) | PemLabel | Allocation(AllocError)
+enum Endian
+    Little | Big
+class Encoding
+    def encode(self, source: &Bytes, start: i64, stop: i64) -> Result[Bytes, EncodingError]
+    def decode(self, source: &Bytes, start: i64, stop: i64) -> Result[Bytes, EncodingError]
+    def text(self, source: &Bytes, start: i64, stop: i64) -> Result[str, EncodingError]
+    def from_text(self, text: &str) -> Result[Bytes, EncodingError]
+def custom(symbols: &str, padding: Option[u8] = Some(61u8)) -> Result[Encoding, EncodingError]
+def base32_encode(source: &Bytes, start: i64, stop: i64) -> Result[Bytes, EncodingError]
+def base32_decode(source: &Bytes, start: i64, stop: i64) -> Result[Bytes, EncodingError]
+def base32_text(source: &Bytes, start: i64, stop: i64) -> Result[str, EncodingError]
+def base32_from_text(text: &str) -> Result[Bytes, EncodingError]
+def base32hex_encode(source: &Bytes, start: i64, stop: i64) -> Result[Bytes, EncodingError]
+def base32hex_decode(source: &Bytes, start: i64, stop: i64) -> Result[Bytes, EncodingError]
+def base32hex_text(source: &Bytes, start: i64, stop: i64) -> Result[str, EncodingError]
+def base32hex_from_text(text: &str) -> Result[Bytes, EncodingError]
+def base64mime_encode(source: &Bytes, start: i64, stop: i64) -> Result[Bytes, EncodingError]
+def base64mime_decode(source: &Bytes, start: i64, stop: i64) -> Result[Bytes, EncodingError]
+def base64mime_text(source: &Bytes, start: i64, stop: i64) -> Result[str, EncodingError]
+def base64mime_from_text(text: &str) -> Result[Bytes, EncodingError]
+def pem_encode[S: ByteSource](source: &Bytes, start: i64, stop: i64, label: &S) -> Result[Bytes, EncodingError]
+def pem_text[S: ByteSource](source: &Bytes, start: i64, stop: i64, label: &S) -> Result[str, EncodingError]
+def pem_decode[S: ByteSource](source: &Bytes, start: i64, stop: i64, label: &S) -> Result[Bytes, EncodingError]
+def pem_from_text[S: ByteSource](text: &str, label: &S) -> Result[Bytes, EncodingError]
+def hex_encode(source: &Bytes, start: i64, stop: i64) -> Result[Bytes, EncodingError]
+def hex_decode(source: &Bytes, start: i64, stop: i64) -> Result[Bytes, EncodingError]
+def hex_text(source: &Bytes, start: i64, stop: i64) -> Result[str, EncodingError]
+def hex_from_text(text: &str) -> Result[Bytes, EncodingError]
+def base64_encode(source: &Bytes, start: i64, stop: i64) -> Result[Bytes, EncodingError]
+def base64_decode(source: &Bytes, start: i64, stop: i64) -> Result[Bytes, EncodingError]
+def base64_text(source: &Bytes, start: i64, stop: i64) -> Result[str, EncodingError]
+def base64_from_text(text: &str) -> Result[Bytes, EncodingError]
+def base64url_encode(source: &Bytes, start: i64, stop: i64) -> Result[Bytes, EncodingError]
+def base64url_decode(source: &Bytes, start: i64, stop: i64) -> Result[Bytes, EncodingError]
+def base64url_text(source: &Bytes, start: i64, stop: i64) -> Result[str, EncodingError]
+def base64url_from_text(text: &str) -> Result[Bytes, EncodingError]
+def pack_u16(target: &mut Bytes, offset: i64, value: u16, order: Endian) -> Result[(), EncodingError]
+def pack_u32(target: &mut Bytes, offset: i64, value: u32, order: Endian) -> Result[(), EncodingError]
+def pack_u64(target: &mut Bytes, offset: i64, value: u64, order: Endian) -> Result[(), EncodingError]
+def pack_i16(target: &mut Bytes, offset: i64, value: i16, order: Endian) -> Result[(), EncodingError]
+def pack_i32(target: &mut Bytes, offset: i64, value: i32, order: Endian) -> Result[(), EncodingError]
+def pack_i64(target: &mut Bytes, offset: i64, value: i64, order: Endian) -> Result[(), EncodingError]
+def append_u16(target: &mut Bytes, value: u16, order: Endian) -> Result[(), EncodingError]
+def append_u32(target: &mut Bytes, value: u32, order: Endian) -> Result[(), EncodingError]
+def append_u64(target: &mut Bytes, value: u64, order: Endian) -> Result[(), EncodingError]
+def append_i16(target: &mut Bytes, value: i16, order: Endian) -> Result[(), EncodingError]
+def append_i32(target: &mut Bytes, value: i32, order: Endian) -> Result[(), EncodingError]
+def append_i64(target: &mut Bytes, value: i64, order: Endian) -> Result[(), EncodingError]
+def unpack_u16(source: &Bytes, offset: i64, order: Endian) -> Result[u16, EncodingError]
+def unpack_u32(source: &Bytes, offset: i64, order: Endian) -> Result[u32, EncodingError]
+def unpack_u64(source: &Bytes, offset: i64, order: Endian) -> Result[u64, EncodingError]
+def unpack_i16(source: &Bytes, offset: i64, order: Endian) -> Result[i16, EncodingError]
+def unpack_i32(source: &Bytes, offset: i64, order: Endian) -> Result[i32, EncodingError]
+def unpack_i64(source: &Bytes, offset: i64, order: Endian) -> Result[i64, EncodingError]
+```
+
+## `std.env`
+
+Environment variables as text or bytes, a detached snapshot, and the working directory. Errors: `IoError`. [Reference](env.md).
+
+```text
+class Variable
+    name: list[u8]
+    value: list[u8]
+def valid_name(name: &list[u8]) -> bool
+def get_bytes(name: &list[u8]) -> Result[Option[list[u8]], IoError]
+def get(name: &str) -> Result[Option[str], IoError]
+def vars() -> Result[list[Variable], IoError]
+def current_dir() -> Result[Path, IoError]
+def set_current_dir(path: &Path) -> Result[(), IoError]
+```
+
+## `std.error`
+
+Explicit error mapping, operation/path context, descriptions, and standard-error reports. Errors: Mapper-selected error, `Context[E]`, `AllocError`. [Reference](error.md).
+
+```text
+def map_error[T, E, G, F: OnceCallable[[E], G]](result: Result[T, E], mapper: F) -> Result[T, G]
+enum Subject
+    Absent | At(Path) | Unavailable(AllocError)
+class Context[E]
+    operation: str
+    subject: Subject
+    cause: E
+    def format(self, output: &mut Formatter) -> Result[(), FormatError]
+    def describe(self) -> Result[str, AllocError]
+    def describe_with(self, cause: &str) -> Result[str, AllocError]
+    def report(self) -> ()
+    def report_with(self, description: Result[str, AllocError]) -> ()
+def context[T, E](result: Result[T, E], operation: str) -> Result[T, Context[E]]
+def path_context[T, E](result: Result[T, E], operation: str, path: &Path) -> Result[T, Context[E]]
+def native_code(error: IoError) -> Option[i32]
+```
+
+## `std.fmt`
+
+Static display/debug, bounded writer output and fallible strings. Errors: `FormatError`. [Reference](fmt.md).
+
+```text
+enum FormatError
+    InvalidSpec | LimitExceeded | RecursionLimit | Bytes(BytesError) | Output(StreamError)
+class Spec
+    fill: str
+    align: str
+    sign: str
+    coerce_zero: bool
+    alternate: bool
+    zero: bool
+    width: i64
+    grouping: str
+    precision: i64
+    kind: str
+def spec(fill: str = " ", align: str = "", sign: str = "", coerce_zero: bool = False, alternate: bool = False, zero: bool = False, width: i64 = 0, grouping: str = "", precision: i64 = -1, kind: str = "") -> Spec
+def spec_fill(fill: &str, align: &str) -> Result[str, FormatError]
+def spec_align(align: &str) -> Result[str, FormatError]
+def spec_count(value: i64) -> Result[i64, FormatError]
+class Formatter[W]
+    writer: W
+    def completed(self) -> i64
+    def text(self: &mut Formatter[W], value: &str) -> Result[(), FormatError]
+    def boolean(self: &mut Formatter[W], value: bool) -> Result[(), FormatError]
+    def floating(self: &mut Formatter[W], value: f64, width: i64) -> Result[(), FormatError]
+    def unsigned(self: &mut Formatter[W], value: u64, base: i64, width: i64) -> Result[(), FormatError]
+    def integer(self: &mut Formatter[W], value: i64, width: i64) -> Result[(), FormatError]
+    def debug_text(self: &mut Formatter[W], value: &str) -> Result[(), FormatError]
+    def ascii_text(self: &mut Formatter[W], value: &str) -> Result[(), FormatError]
+    def char_spec(self: &mut Formatter[W], code: i64, spec: &Spec) -> Result[(), FormatError]
+    def text_spec(self: &mut Formatter[W], value: &str, spec: &Spec) -> Result[(), FormatError]
+    def signed_spec(self: &mut Formatter[W], value: i64, spec: &Spec) -> Result[(), FormatError]
+    def unsigned_spec(self: &mut Formatter[W], value: u64, spec: &Spec) -> Result[(), FormatError]
+    def float_spec(self: &mut Formatter[W], value: f64, spec: &Spec) -> Result[(), FormatError]
+    def float32_spec(self: &mut Formatter[W], value: f32, spec: &Spec) -> Result[(), FormatError]
+    def enter(self: &mut Formatter[W]) -> Result[(), FormatError]
+    def leave(self: &mut Formatter[W]) -> ()
+def formatter[W: Writer](writer: W, scratch: Bytes, max_bytes: i64, max_depth: i64) -> Result[Formatter[W], FormatError]
+def string_formatter(max_bytes: i64, max_depth: i64) -> Result[Formatter[Cursor], FormatError]
+def finish(output: &Formatter[Cursor]) -> Result[str, FormatError]
+def display[T, W](value: &T, output: &mut Formatter[W]) -> Result[(), FormatError]
+def debug[T, W](value: &T, output: &mut Formatter[W]) -> Result[(), FormatError]
+def to_string[T](value: &T, max_bytes: i64, max_depth: i64) -> Result[str, FormatError]
+def to_debug[T](value: &T, max_bytes: i64, max_depth: i64) -> Result[str, FormatError]
+def represent[T, W](value: &T, output: &mut Formatter[W]) -> Result[(), FormatError]
+def repr_string[T](value: &T) -> Result[str, FormatError]
+def debug_string(value: &str) -> Result[str, FormatError]
+def ascii_string(value: &str) -> Result[str, FormatError]
+def list_with[T, W, F: Callable[[&T, &mut Formatter[W]], Result[(), FormatError]]](values: &list[T], output: &mut Formatter[W], render: F) -> Result[(), FormatError]
+def pair_with[A, B, W, F: Callable[[&A, &mut Formatter[W]], Result[(), FormatError]], G: Callable[[&B, &mut Formatter[W]], Result[(), FormatError]]](value: &(A, B), output: &mut Formatter[W], first: F, second: G) -> Result[(), FormatError]
+```
+
+## `std.fs`
+
+Directories, metadata/walking, rooted mutation, owned temporary resources, bounded copy/delete/glob. Errors: `IoError`, `AllocError`, `WalkError`, `FsError`. [Reference](fs.md).
+
+```text
+enum FsError
+    Io(IoError) | Stream(StreamError) | Allocation(AllocError) | Entropy(SecretsError) | InvalidInput | Limit | Cancelled | Replaced | Collisions
+class Root
+    def open_dir(self, name: &Path) -> Result[Root, IoError]
+    def read_file(self, name: &Path) -> Result[FileStream, IoError]
+    def create_dir(self, name: &Path) -> Result[(), IoError]
+    def remove_file(self, name: &Path) -> Result[(), IoError]
+    def remove_dir(self, name: &Path) -> Result[(), IoError]
+    def move(self, source: &Path, destination: &Path) -> Result[(), IoError]
+    def names(self) -> Result[Names, IoError]
+def root(path: &Path) -> Result[Root, IoError]
+class Names
+    def next(self: &mut Names) -> Result[Option[Path], IoError]
+    def close(self: &mut Names) -> Result[(), IoError]
+class TempFile
+    stream: FileStream
+    def publish(self: &mut TempFile, name: &Path) -> Result[(), IoError]
+    def close(self: &mut TempFile) -> Result[(), StreamError]
+    def remove_published(self: &mut TempFile, name: &Path) -> Result[(), FsError]
+def temporary_file(parent: &Root) -> Result[TempFile, IoError]
+class TempDir
+    def name(self) -> &Path
+    def root(self) -> &Root
+    def cleanup(self: &mut TempDir) -> Result[(), FsError]
+    def keep(self: &mut TempDir) -> ()
+    def cleanup_tree(self: &mut TempDir, max_entries: i64, max_depth: i64, cancel: &CancellationToken) -> Result[(), FsError]
+def temporary_dir_named(parent: &Root, name: &Path) -> Result[TempDir, FsError]
+def temporary_dir(parent: &Root, prefix: &Path, attempts: i64) -> Result[TempDir, FsError]
+def copy_from[R: Reader](source: &mut R, parent: &Root, destination: &Path, max_bytes: i64, cancel: &CancellationToken) -> Result[i64, FsError]
+def copy_file(parent: &Root, source: &Path, destination: &Path, max_bytes: i64, cancel: &CancellationToken) -> Result[i64, FsError]
+def remove_tree(parent: &Root, name: &Path, max_entries: i64, max_depth: i64, cancel: &CancellationToken) -> Result[(), FsError]
+def glob(parent: &Root, pattern: &Path, max_entries: i64, max_matches: i64, max_steps: i64) -> Result[list[Path], FsError]
+enum FileType
+    File | Directory | Symlink | Other
+class Permissions
+    readonly: bool
+    unix_mode: u32
+class Metadata
+    def file_type(self) -> FileType
+    def is_file(self) -> bool
+    def is_dir(self) -> bool
+    def is_symlink(self) -> bool
+    def size(self) -> u64
+    def permissions(self) -> Permissions
+    def modified(self) -> Option[Timestamp]
+    def accessed(self) -> Option[Timestamp]
+    def created(self) -> Option[Timestamp]
+    def unix_changed(self) -> Timestamp
+    def unix_uid(self) -> u32
+    def unix_gid(self) -> u32
+    def unix_device(self) -> u64
+    def unix_inode(self) -> u64
+class DirEntry
+    def file_name(self) -> Result[Path, IoError]
+    def path(self) -> Result[Path, IoError]
+    def file_type(self) -> Result[FileType, IoError]
+    def metadata(self) -> Result[Metadata, IoError]
+class ReadDir
+    def next(self: &mut ReadDir) -> Result[Option[DirEntry], IoError]
+    def close(self: &mut ReadDir) -> Result[(), IoError]
+    def closed(self) -> bool
+def read_dir(path: &Path) -> Result[ReadDir, IoError]
+def metadata(path: &Path) -> Result[Metadata, IoError]
+def symlink_metadata(path: &Path) -> Result[Metadata, IoError]
+def file_metadata(stream: &FileStream) -> Result[Metadata, IoError]
+def read_link(path: &Path) -> Result[Path, IoError]
+def entries(owner: ReadDir) -> Generator[Result[DirEntry, IoError]]
+enum WalkError
+    Io(Path, str, IoError) | Allocation(AllocError)
+class WalkDir
+    path: Path
+    directories: list[Path]
+    files: list[DirEntry]
+class Walk
+    current: WalkDir
+    def close(self: &mut Walk) -> ()
+    def next(self: &mut Walk) -> Result[bool, WalkError]
+def walk(root: &Path, top_down: bool) -> Result[Walk, AllocError]
+```
+
+## `std.fs.dirs`
+
+The home directory and the XDG configuration, cache, data, and state directories, from the environment. Errors: `IoError`. [Reference](fs/dirs.md).
+
+```text
+def home_dir() -> Result[Option[Path], IoError]
+def config_dir() -> Result[Option[Path], IoError]
+def cache_dir() -> Result[Option[Path], IoError]
+def data_dir() -> Result[Option[Path], IoError]
+def state_dir() -> Result[Option[Path], IoError]
+```
+
+## `std.fs.watch`
+
+Bounded Linux filesystem change batches, rename cookies, overflow and readiness waits. Errors: `WatchError`, `WaitError`. [Reference](fs/watch.md).
+
+```text
+enum WatchError
+    OutOfRange | InvalidData | Io(IoError) | Wait(WaitError) | Allocation(AllocError)
+class Event
+    watch: i32
+    cookie: u32
+    name: Path
+    def created(self) -> bool
+    def deleted(self) -> bool
+    def modified(self) -> bool
+    def metadata_changed(self) -> bool
+    def closed_after_write(self) -> bool
+    def moved_from(self) -> bool
+    def moved_to(self) -> bool
+    def deleted_self(self) -> bool
+    def moved_self(self) -> bool
+    def unmounted(self) -> bool
+    def overflowed(self) -> bool
+    def ignored(self) -> bool
+    def is_directory(self) -> bool
+class Watcher
+    def add(self: &mut Watcher, path: &Path) -> Result[i32, WatchError]
+    def remove(self: &mut Watcher, watch: i32) -> Result[(), WatchError]
+    def poll(self: &mut Watcher) -> Result[i64, WatchError]
+    def wait(self: &mut Watcher, deadline: &Deadline, cancel: &CancellationToken) -> Result[i64, WatchError]
+    def count(self) -> i64
+    def event(self, index: i64) -> Result[Event, WatchError]
+    def register(self, selector: &mut Selector, key: u64) -> Result[(), WaitError]
+    def unregister(self, selector: &mut Selector) -> Result[(), WaitError]
+    def close(self: &mut Watcher) -> Result[(), WatchError]
+def watcher(batch_bytes: i64 = 4096) -> Result[Watcher, WatchError]
+```
+
+## `std.graph`
+
+Directed and undirected graphs with node and edge data, stable handles, traversal, shortest paths, topological order, components and spanning trees. Errors: `AllocError`, `GraphError`. [Reference](graph.md).
+
+```text
+type NodeId = i64
+type EdgeId = i64
+enum GraphError
+    Cycle(list[NodeId]) | NegativeCycle(list[NodeId]) | InvalidWeight(EdgeId) | InvalidEstimate(NodeId)
+class Walk
+class Paths
+    def distance(self, node: NodeId) -> Option[f64]
+    def edge_to(self, node: NodeId) -> Option[EdgeId]
+    def path(self, node: NodeId) -> Result[list[NodeId], AllocError]
+class DiGraph[N, E]
+    def __init__(self) -> Result[(), AllocError]
+    def node_count(self) -> i64
+    def edge_count(self) -> i64
+    def node_bound(self) -> i64
+    def edge_bound(self) -> i64
+    def reserve(self: &mut DiGraph[N, E], nodes: i64, edges: i64) -> Result[(), AllocError]
+    def add_node(self: &mut DiGraph[N, E], data: N) -> Result[NodeId, AllocError]
+    def add_edge(self: &mut DiGraph[N, E], source: NodeId, target: NodeId, data: E) -> Result[EdgeId, AllocError]
+    def remove_node(self: &mut DiGraph[N, E], node: NodeId) -> Option[N]
+    def remove_edge(self: &mut DiGraph[N, E], edge: EdgeId) -> Option[E]
+    def contains_node(self, node: NodeId) -> bool
+    def contains_edge(self, edge: EdgeId) -> bool
+    def node(self, node: NodeId) -> &N
+    def node_mut(self: &mut DiGraph[N, E], node: NodeId) -> &mut N
+    def edge(self, edge: EdgeId) -> &E
+    def edge_mut(self: &mut DiGraph[N, E], edge: EdgeId) -> &mut E
+    def get_node_ref(self, node: NodeId) -> Option[&N]
+    def get_node_mut(self: &mut DiGraph[N, E], node: NodeId) -> Option[&mut N]
+    def get_edge_ref(self, edge: EdgeId) -> Option[&E]
+    def get_edge_mut(self: &mut DiGraph[N, E], edge: EdgeId) -> Option[&mut E]
+    def source(self, edge: EdgeId) -> NodeId
+    def target(self, edge: EdgeId) -> NodeId
+    def find_edge(self, source: NodeId, target: NodeId) -> Option[EdgeId]
+    def nodes(self) -> Result[list[NodeId], AllocError]
+    def edges(self) -> Result[list[EdgeId], AllocError]
+    def successors(self, node: NodeId) -> Result[list[NodeId], AllocError]
+    def predecessors(self, node: NodeId) -> Result[list[NodeId], AllocError]
+    def outgoing(self, node: NodeId) -> Walk
+    def incoming(self, node: NodeId) -> Walk
+    def next_edge(self, walk: &mut Walk) -> Option[EdgeId]
+    def bfs(self, start: NodeId) -> Result[list[NodeId], AllocError]
+    def dfs(self, start: NodeId) -> Result[list[NodeId], AllocError]
+    def toposort(self) -> Result[list[NodeId], AllocError | GraphError]
+    def strongly_connected_components(self) -> Result[list[list[NodeId]], AllocError]
+    def dijkstra[F: Callable[[&E], f64]](self, start: NodeId, weight: &F) -> Result[Paths, AllocError | GraphError]
+    def astar[F: Callable[[&E], f64], H: Callable[[NodeId], f64]](self, start: NodeId, goal: NodeId, weight: &F, estimate: &H) -> Result[Option[(f64, list[NodeId])], AllocError | GraphError]
+    def bellman_ford[F: Callable[[&E], f64]](self, start: NodeId, weight: &F) -> Result[Paths, AllocError | GraphError]
+class UnGraph[N, E]
+    def __init__(self) -> Result[(), AllocError]
+    def node_count(self) -> i64
+    def edge_count(self) -> i64
+    def node_bound(self) -> i64
+    def edge_bound(self) -> i64
+    def reserve(self: &mut UnGraph[N, E], nodes: i64, edges: i64) -> Result[(), AllocError]
+    def add_node(self: &mut UnGraph[N, E], data: N) -> Result[NodeId, AllocError]
+    def add_edge(self: &mut UnGraph[N, E], a: NodeId, b: NodeId, data: E) -> Result[EdgeId, AllocError]
+    def remove_node(self: &mut UnGraph[N, E], node: NodeId) -> Option[N]
+    def remove_edge(self: &mut UnGraph[N, E], edge: EdgeId) -> Option[E]
+    def contains_node(self, node: NodeId) -> bool
+    def contains_edge(self, edge: EdgeId) -> bool
+    def node(self, node: NodeId) -> &N
+    def node_mut(self: &mut UnGraph[N, E], node: NodeId) -> &mut N
+    def edge(self, edge: EdgeId) -> &E
+    def edge_mut(self: &mut UnGraph[N, E], edge: EdgeId) -> &mut E
+    def get_node_ref(self, node: NodeId) -> Option[&N]
+    def get_node_mut(self: &mut UnGraph[N, E], node: NodeId) -> Option[&mut N]
+    def get_edge_ref(self, edge: EdgeId) -> Option[&E]
+    def get_edge_mut(self: &mut UnGraph[N, E], edge: EdgeId) -> Option[&mut E]
+    def endpoints(self, edge: EdgeId) -> (NodeId, NodeId)
+    def opposite(self, edge: EdgeId, node: NodeId) -> NodeId
+    def find_edge(self, a: NodeId, b: NodeId) -> Option[EdgeId]
+    def nodes(self) -> Result[list[NodeId], AllocError]
+    def edges(self) -> Result[list[EdgeId], AllocError]
+    def neighbors(self, node: NodeId) -> Result[list[NodeId], AllocError]
+    def incident(self, node: NodeId) -> Walk
+    def next_edge(self, walk: &mut Walk) -> Option[EdgeId]
+    def bfs(self, start: NodeId) -> Result[list[NodeId], AllocError]
+    def dfs(self, start: NodeId) -> Result[list[NodeId], AllocError]
+    def connected_components(self) -> Result[list[list[NodeId]], AllocError]
+    def dijkstra[F: Callable[[&E], f64]](self, start: NodeId, weight: &F) -> Result[Paths, AllocError | GraphError]
+    def astar[F: Callable[[&E], f64], H: Callable[[NodeId], f64]](self, start: NodeId, goal: NodeId, weight: &F, estimate: &H) -> Result[Option[(f64, list[NodeId])], AllocError | GraphError]
+    def bellman_ford[F: Callable[[&E], f64]](self, start: NodeId, weight: &F) -> Result[Paths, AllocError | GraphError]
+    def minimum_spanning_tree[F: Callable[[&E], f64]](self, weight: &F) -> Result[list[EdgeId], AllocError | GraphError]
+```
+
+## `std.http`
+
+Bounded HTTP/1.1 message heads and streamed `Content-Length`, chunked, and close-delimited bodies over `std.io` streams. Errors: `HttpError`. [Reference](http.md).
+
+```text
+enum HttpError
+    Stream(StreamError) | Allocation(AllocError) | InvalidLimit | Truncated | LineTooLong | HeadTooLarge | TooManyHeaders | BareLineFeed | InvalidRequestLine | InvalidStatusLine | UnsupportedVersion | InvalidHeader | InvalidContentLength | DuplicateFraming | ConflictingFraming | UnsupportedTransferEncoding | InvalidChunk | BodyTooLarge | LengthMismatch | Unfinished | Broken | InvalidTarget | MissingHost | DuplicateHost | InvalidHost
+class Limits
+    max_line: i64
+    max_head: i64
+    max_headers: i64
+    max_body: i64
+def limits() -> Limits
+class Header
+    name: str
+    value: str
+class RequestHead
+    method: str
+    target: str
+    minor: i64
+    headers: list[Header]
+    def add(self: &mut RequestHead, name: str, value: str) -> Result[(), HttpError]
+class ResponseHead
+    minor: i64
+    status: i64
+    reason: str
+    headers: list[Header]
+    def add(self: &mut ResponseHead, name: str, value: str) -> Result[(), HttpError]
+enum Framing
+    Empty | Length(i64) | Chunked | UntilClose
+def request(method: str, target: str) -> Result[RequestHead, HttpError]
+def response(status: i64, reason: str) -> Result[ResponseHead, HttpError]
+def find(headers: &list[Header], name: &str) -> Option[i64]
+def same_name(left: &str, right: &str) -> bool
+def parse_field(line: &Bytes, size: i64) -> Result[Header, HttpError]
+def parse_request_line(line: &Bytes, size: i64) -> Result[RequestHead, HttpError]
+def parse_status_line(line: &Bytes, size: i64) -> Result[ResponseHead, HttpError]
+def read_request[R: Reader](conn: &mut BufReader[R], limits: &Limits) -> Result[Option[RequestHead], HttpError]
+def read_response[R: Reader](conn: &mut BufReader[R], limits: &Limits) -> Result[Option[ResponseHead], HttpError]
+def request_framing(head: &RequestHead) -> Result[Framing, HttpError]
+def response_framing(head: &ResponseHead, method: &str) -> Result[Framing, HttpError]
+def request_keeps_alive(head: &RequestHead) -> bool
+class RequestTarget
+    authority: str
+    path: str
+    query: str
+def request_target(head: &RequestHead) -> Result[RequestTarget, HttpError]
+def response_keeps_alive(head: &ResponseHead, framing: &Framing) -> bool
+class BodyReader[R]
+    trailers: list[Header]
+    def total(self) -> i64
+    def is_done(self) -> bool
+    def take_failure(self: &mut BodyReader[R]) -> Option[HttpError]
+    def read_body(self: &mut BodyReader[R], buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, HttpError]
+    def read(self: &mut BodyReader[R], buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StreamError]
+def body_reader[R: Reader](conn: BufReader[R], framing: &Framing, limits: &Limits) -> Result[BodyReader[R], HttpError]
+def read_to_end[R: Reader](body: &mut BodyReader[R], out: &mut Bytes) -> Result[i64, HttpError]
+def discard[R: Reader](body: &mut BodyReader[R]) -> Result[i64, HttpError]
+def finish[R](body: &mut BodyReader[R]) -> Result[BufReader[R], HttpError]
+def release[R](body: &mut BodyReader[R]) -> Option[BufReader[R]]
+def write_request[W: Writer](writer: &mut W, head: &RequestHead) -> Result[(), HttpError]
+def encode_request(head: &RequestHead) -> Result[Bytes, HttpError]
+def write_response[W: Writer](writer: &mut W, head: &ResponseHead) -> Result[(), HttpError]
+def encode_response(head: &ResponseHead) -> Result[Bytes, HttpError]
+def write_chunk[W: Writer](writer: &mut W, source: &Bytes, start: i64, stop: i64) -> Result[(), HttpError]
+def encode_chunk_size(length: i64) -> Result[Bytes, HttpError]
+def write_last_chunk[W: Writer](writer: &mut W, trailers: &list[Header]) -> Result[(), HttpError]
+def encode_last_chunk(trailers: &list[Header]) -> Result[Bytes, HttpError]
+def write_body[W: Writer](writer: &mut W, framing: &Framing, source: &Bytes, start: i64, stop: i64) -> Result[(), HttpError]
+```
+
+## `std.http.body`
+
+Bounded request bodies for handlers: URL-encoded forms, JSON, and multipart uploads into unnamed temporary files. Errors: `BodyError`. [Reference](http-body.md).
+
+```text
+enum BodyError
+    InvalidLimit | UnsupportedMediaType | TooLarge | TooManyFields | Malformed | InvalidUtf8 | Http(HttpError) | Json(JsonError) | Storage(StreamError) | Allocation(AllocError)
+def status(error: &BodyError) -> i64
+def reject[T: Transport](exchange: &mut Exchange[T], error: &BodyError) -> Result[(), HttpError]
+class FormLimits
+    max_bytes: i64
+    max_fields: i64
+def form_limits() -> FormLimits
+def parse_form(source: &Bytes, limits: &FormLimits) -> Result[list[Pair], BodyError]
+def parse_form_text(text: &str, limits: &FormLimits) -> Result[list[Pair], BodyError]
+def find(pairs: &list[Pair], key: &str) -> Option[i64]
+def read_form[T: Transport](exchange: &mut Exchange[T], limits: &FormLimits) -> Result[list[Pair], BodyError]
+def read_json[T: Transport](exchange: &mut Exchange[T], limits: &std.json.Limits) -> Result[Json, BodyError]
+def send_json[T: Transport](exchange: &mut Exchange[T], status: i64, value: &Json, limits: &std.json.Limits) -> Result[(), BodyError]
+class MultipartLimits
+    max_parts: i64
+    max_head: i64
+    max_field: i64
+    max_file: i64
+    max_body: i64
+def multipart_limits() -> MultipartLimits
+enum Content
+    Text(str) | File(TempFile)
+class Part
+    name: str
+    filename: Option[str]
+    content_type: str
+    size: i64
+    content: Content
+def read_multipart[T: Transport](exchange: &mut Exchange[T], limits: &MultipartLimits, storage: &Root) -> Result[list[Part], BodyError]
+```
+
+## `std.http.client`
+
+HTTP/1.1 client: pooled connections, deadlines and cancellation, bounded redirects, an explicit proxy, and replay of idempotent requests only. Errors: `ClientError`. [Reference](http-client.md).
+
+```text
+enum ClientError
+    Net(NetError) | Http(HttpError) | Url(UrlError) | Allocation(AllocError) | InvalidConfig | InvalidUrl | UnsupportedScheme | InvalidRequest | InvalidRedirect | TooManyRedirects | UnexpectedInterim | Tls(TlsFailure) | TunnelRefused(i64) | Body(StreamError) | WrongBodyLength
+enum TlsFailure
+    UntrustedCertificate | ExpiredCertificate | WrongHost | InvalidCertificate | RevokedCertificate | Rejected | Protocol | InvalidName | InvalidConfiguration | NoTrustRoots | CertificateRequired | Incompatible
+class Tunnel
+    host: str
+    port: u16
+    authorization: Option[str]
+    limits: Limits
+class Endpoint
+    scheme: str
+    host: str
+    port: u16
+    tunnel: Option[Tunnel]
+protocol Transport
+    def read_before(self: &mut Transport, buffer: &mut Bytes, start: i64, stop: i64, deadline: &Deadline, cancel: &CancellationToken) -> Result[i64, ClientError]
+    def write_before[S: ByteSource](self: &mut Transport, source: &S, start: i64, stop: i64, deadline: &Deadline, cancel: &CancellationToken) -> Result[i64, ClientError]
+protocol Connector[T]
+    def open(self, endpoint: &Endpoint, deadline: &Deadline, cancel: &CancellationToken) -> Result[T, ClientError]
+class Plain
+    def read_before(self: &mut Plain, buffer: &mut Bytes, start: i64, stop: i64, deadline: &Deadline, cancel: &CancellationToken) -> Result[i64, ClientError]
+    def write_before[S: ByteSource](self: &mut Plain, source: &S, start: i64, stop: i64, deadline: &Deadline, cancel: &CancellationToken) -> Result[i64, ClientError]
+class TcpConnector
+    def open(self, endpoint: &Endpoint, deadline: &Deadline, cancel: &CancellationToken) -> Result[Plain, ClientError]
+def dial(endpoint: &Endpoint, deadline: &Deadline, cancel: &CancellationToken) -> Result[TcpStream, ClientError]
+class Dialled
+    def read(self: &mut Dialled, buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StepError[ClientError]]
+    def write(self: &mut Dialled, source: &Bytes, start: i64, stop: i64) -> Result[i64, StepError[ClientError]]
+class Proxy
+    endpoint: Endpoint
+    authorization: Option[str]
+def proxy(url: &str) -> Result[Proxy, ClientError]
+class Config
+    limits: Limits
+    connect_timeout: Duration
+    write_timeout: Duration
+    head_timeout: Duration
+    read_timeout: Duration
+    idle_timeout: Duration
+    continue_timeout: Duration
+    max_idle: i64
+    max_idle_per_origin: i64
+    redirects: i64
+    retries: i64
+    sensitive: list[str]
+    proxy: Option[Proxy]
+def config() -> Result[Config, ClientError]
+class Upload
+    length: Option[i64]
+    expect_continue: bool
+def sized(length: i64) -> Upload
+def chunked() -> Upload
+class Unstreamed
+    def read(self: &mut Unstreamed, buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StreamError]
+class Stats
+    opened: u64
+    reused: u64
+    retried: u64
+    redirected: u64
+    discarded: u64
+class Request
+    method: str
+    url: str
+    headers: list[Header]
+    body: Bytes
+    def add(self: &mut Request, name: str, value: str) -> Result[(), ClientError]
+def request(method: &str, url: &str) -> Result[Request, ClientError]
+class Fetched
+    status: i64
+    head: ResponseHead
+    url: str
+    redirects: i64
+    body: Bytes
+class Wire[T]
+    def read(self: &mut Wire[T], buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StepError[ClientError]]
+    def write(self: &mut Wire[T], source: &Bytes, start: i64, stop: i64) -> Result[i64, StepError[ClientError]]
+class Response[T]
+    status: i64
+    head: ResponseHead
+    url: str
+    redirects: i64
+    def is_done(self) -> bool
+    def read_body(self: &mut Response[T], buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, ClientError]
+    def read_all(self: &mut Response[T], out: &mut Bytes) -> Result[i64, ClientError]
+    def read_all_progress(self: &mut Response[T], out: &mut Bytes) -> Result[i64, Partial[ClientError]]
+    def total(self) -> i64
+    def trailers(self) -> &list[Header]
+    def read_typed(self: &mut Response[T], buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StepError[ClientError]]
+    def read(self: &mut Response[T], buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StreamError]
+    def take_failure(self: &mut Response[T]) -> Option[ClientError]
+class TypedResponse[T]
+    def read(self: &mut TypedResponse[T], buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StepError[ClientError]]
+def typed_response[T](response: Response[T]) -> TypedResponse[T]
+def unwrap_response[T](response: TypedResponse[T]) -> Response[T]
+class Client[T, C]
+    def stats(self) -> Stats
+    def idle(self) -> i64
+    def close_idle(self) -> ()
+    def send(self, request: Request, deadline: &Deadline, cancel: &CancellationToken) -> Result[Response[T], ClientError]
+    def send_from[R: Reader](self, request: Request, body: &mut R, upload: &Upload, deadline: &Deadline, cancel: &CancellationToken) -> Result[Response[T], ClientError]
+    def fetch(self, request: Request, deadline: &Deadline, cancel: &CancellationToken) -> Result[Fetched, ClientError]
+    def get(self, url: &str, deadline: &Deadline, cancel: &CancellationToken) -> Result[Fetched, ClientError]
+    def finish(self, response: Response[T]) -> ()
+def client(config: Config) -> Result[Client[Plain, TcpConnector], ClientError]
+def connector[T: Transport, C: Connector[T]](opener: C, config: Config) -> Result[Client[T, C], ClientError]
+```
+
+## `std.http.cookie`
+
+Cookie fields read leniently and `Set-Cookie` fields validated against injection, with secure defaults. Errors: `CookieError`. [Reference](http-cookie.md).
+
+```text
+enum CookieError
+    InvalidName | InvalidValue | InvalidAttribute | TooManyCookies | InvalidKey | Http(HttpError) | Crypto(CryptoError) | Allocation(AllocError)
+class Cookie
+    name: str
+    value: str
+def cookies(headers: &list[Header], limit: i64) -> Result[list[Cookie], CookieError]
+def find(cookies: &list[Cookie], name: &str) -> Option[i64]
+enum SameSite
+    Strict | Lax | Unrestricted
+class SetCookie
+    name: str
+    value: str
+    path: str
+    domain: str
+    max_age: Option[i64]
+    secure: bool
+    http_only: bool
+    same_site: SameSite
+    def format(self) -> Result[str, CookieError]
+def set_cookie(name: &str, value: &str) -> Result[SetCookie, CookieError]
+def removal(name: &str) -> Result[SetCookie, CookieError]
+def add(head: &mut ResponseHead, cookie: &SetCookie) -> Result[(), CookieError]
+const min_key: i64 = 32
+def sign(keys: &list[Bytes], name: &str, value: &str) -> Result[str, CookieError]
+def verify(keys: &list[Bytes], name: &str, signed: &str) -> Result[Option[str], CookieError]
+def find_signed(cookies: &list[Cookie], keys: &list[Bytes], name: &str) -> Result[Option[str], CookieError]
+def signed_cookie(keys: &list[Bytes], name: &str, value: &str) -> Result[SetCookie, CookieError]
+```
+
+## `std.http.files`
+
+Static files below a `Root`, opened one segment at a time without following links, with media types and conditional requests. Errors: `FilesError`. [Reference](http-files.md).
+
+```text
+enum FilesError
+    Io(IoError) | Stream(StreamError) | Http(HttpError) | Truncated | Allocation(AllocError)
+const max_path: i64 = 4096
+def open_file(root: &Root, path: &str) -> Result[Option[FileStream], FilesError]
+def media_type(name: &str) -> str
+def http_date(seconds: i64) -> Result[Option[str], FilesError]
+def parse_http_date(text: &str) -> Result[Option[i64], FilesError]
+def serve[T: Transport](exchange: &mut Exchange[T], root: &Root, path: &str) -> Result[i64, FilesError]
+```
+
+## `std.http.https`
+
+`std.http.client` for `https` URLs through [`std.tls`](tls.md), verified by default, with `CONNECT` tunnels through a proxy. Errors: `ClientError`. [Reference](http-client.md#https).
+
+```text
+class Connection
+    def read_before(self: &mut Connection, buffer: &mut Bytes, start: i64, stop: i64, deadline: &Deadline, cancel: &CancellationToken) -> Result[i64, ClientError]
+    def write_before[S: ByteSource](self: &mut Connection, source: &S, start: i64, stop: i64, deadline: &Deadline, cancel: &CancellationToken) -> Result[i64, ClientError]
+def secure_error(error: TlsError) -> ClientError
+class HttpsConnector
+    def open(self, endpoint: &Endpoint, deadline: &Deadline, cancel: &CancellationToken) -> Result[Connection, ClientError]
+def connector(tls: ClientConfig) -> HttpsConnector
+def client(config: Config, tls: ClientConfig) -> Result[Client[Connection, HttpsConnector], ClientError]
+def system_client(config: Config) -> Result[Client[Connection, HttpsConnector], ClientError]
+```
+
+## `std.http.proxy`
+
+The client address and scheme behind explicitly trusted reverse proxies; deployment guidance. Errors: `ProxyError`. [Reference](http-proxy.md).
+
+```text
+enum ProxyError
+    InvalidNetwork | UnknownPeer | InvalidForwarded | TooManyHops | Allocation(AllocError)
+enum Forwarding
+    # X-Forwarded-For, with the scheme from X-Forwarded-Proto. | XForwardedFor
+class Proxies
+    header: Forwarding
+    max_hops: i64
+    def trust(self: &mut Proxies, network: &str) -> Result[(), ProxyError]
+    def trusts(self, ip: &IpAddress) -> bool
+def proxies(header: Forwarding) -> Result[Proxies, ProxyError]
+class Client
+    address: IpAddress
+    scheme: Option[str]
+    proxied: bool
+def client(peer: &SocketAddress, headers: &list[Header], proxies: &Proxies) -> Result[Client, ProxyError]
+def client_of[T: Transport](exchange: &Exchange[T], proxies: &Proxies) -> Result[Client, ProxyError]
+```
+
+## `std.http.server`
+
+HTTP/1.1 server: routing, a bounded worker pool and admission queue, idle connections parked off the workers, per-phase deadlines, and graceful shutdown. Errors: `ServerError`. [Reference](http-server.md).
+
+```text
+enum ServerError
+    InvalidConfig | InvalidPattern | DuplicateRoute | Allocation(AllocError) | Thread(ThreadError) | Net(NetError)
+protocol Transport
+    def read_before(self: &mut Transport, buffer: &mut Bytes, start: i64, stop: i64, deadline: &Deadline, cancel: &CancellationToken) -> Result[i64, NetError]
+    def write_before[S: ByteSource](self: &mut Transport, source: &S, start: i64, stop: i64, deadline: &Deadline, cancel: &CancellationToken) -> Result[i64, NetError]
+    def shutdown(self: &mut Transport, direction: Shutdown) -> Result[(), NetError]
+protocol Handler[T, R, E]
+    def handle(self, route: &R, exchange: &mut Exchange[T]) -> Result[(), E]
+class Config
+    workers: i64
+    queue: i64
+    limits: Limits
+    idle_timeout: Duration
+    head_timeout: Duration
+    body_timeout: Duration
+    write_timeout: Duration
+    response_timeout: Duration
+    drain_timeout: Duration
+    max_requests: i64
+    events: Option[ChannelSink]
+    handshake_timeout: Duration
+    idle_connections: i64
+def config() -> Config
+class Report
+    connections: u64
+    rejected: u64
+    requests: u64
+    handler_errors: u64
+    protocol_errors: u64
+    timeouts: u64
+    cancelled: u64
+    accept_errors: u64
+    dropped_events: u64
+enum Match
+    Found(i64, list[str]) | NotFound | MethodNotAllowed(str)
+class Router[R]
+    def add(self: &mut Router[R], method: &str, pattern: &str, route: R) -> Result[(), ServerError]
+    def find(self, method: &str, path: &str) -> Result[Match, ServerError]
+    def route(self, index: i64) -> &R
+def router[R]() -> Result[Router[R], ServerError]
+class Conn[T]
+    def read(self: &mut Conn[T], buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StreamError]
+    def write[S: ByteSource](self: &mut Conn[T], source: &S, start: i64, stop: i64) -> Result[i64, StreamError]
+    def flush(self: &mut Conn[T]) -> Result[(), StreamError]
+class Exchange[T]
+    request: RequestHead
+    authority: str
+    path: str
+    query: str
+    params: list[str]
+    peer: Option[SocketAddress]
+    def stopping(self) -> bool
+    def cancelled(self) -> bool
+    def stop_token(self) -> CancellationToken
+    def cancel_token(self) -> CancellationToken
+    def status(self) -> i64
+    def sent(self) -> i64
+    def read_body(self: &mut Exchange[T], buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, HttpError]
+    def read_all(self: &mut Exchange[T], out: &mut Bytes) -> Result[i64, HttpError]
+    def respond(self: &mut Exchange[T], head: ResponseHead, body: &Bytes) -> Result[(), HttpError]
+    def send(self: &mut Exchange[T], status: i64, content_type: &str, body: &Bytes) -> Result[(), HttpError]
+    def send_text(self: &mut Exchange[T], status: i64, text: &str) -> Result[(), HttpError]
+    def start(self: &mut Exchange[T], head: ResponseHead) -> Result[(), HttpError]
+    def write(self: &mut Exchange[T], source: &Bytes, start: i64, stop: i64) -> Result[(), HttpError]
+    def end(self: &mut Exchange[T]) -> Result[(), HttpError]
+    def switch_protocols(self: &mut Exchange[T], head: ResponseHead) -> Result[(T, Bytes), HttpError]
+    def detach(self: &mut Exchange[T], head: ResponseHead) -> Result[T, HttpError]
+def reason(status: i64) -> str
+def serve_connection[T: Transport, R, E, H: Handler[T, R, E]](stream: T, router: &Router[R], handler: &H, config: &Config, stop: &CancellationToken, cancel: &CancellationToken) -> Report
+def serve_connection_from[T: Transport, R, E, H: Handler[T, R, E]](stream: T, peer: Option[SocketAddress], router: &Router[R], handler: &H, config: &Config, stop: &CancellationToken, cancel: &CancellationToken) -> Report
+enum OpenError
+    TimedOut | Cancelled | Failed | Gone
+protocol Opener[T]
+    def open(self, tcp: TcpStream) -> Result[T, OpenError]
+    def advance(self, stream: &mut T, deadline: &Deadline, cancel: &CancellationToken) -> Result[(), OpenError]
+    def handshakes(self) -> bool
+    def watch(self, stream: &T, selector: &mut Selector, key: u64) -> bool
+    def unwatch(self, stream: &T, selector: &mut Selector) -> ()
+def serve[R, E, H: Handler[TcpStream, R, E]](listener: TcpListener, router: &Router[R], handler: &H, config: &Config, stop: &CancellationToken) -> Result[Report, ServerError]
+def serve_with[T: Transport, O: Opener[T], R, E, H: Handler[T, R, E]](listener: TcpListener, opener: &O, router: &Router[R], handler: &H, config: &Config, stop: &CancellationToken) -> Result[Report, ServerError]
+```
+
+## `std.http.sse`
+
+Server-Sent Events from a server exchange: `event`, `id`, multi-line `data`, comments and `retry`, flushed per event, with disconnect and shutdown detection. Errors: `SseError`. [Reference](sse.md).
+
+```text
+enum SseError
+    Net(NetError) | Allocation(AllocError) | Http(HttpError) | InvalidField | InvalidText | OutOfRange | Disconnected | Closed | Stopping
+class EventStream[T]
+    last_event_id: Option[str]
+    def is_open(self) -> bool
+    def send(self: &mut EventStream[T], data: &str, deadline: &Deadline, event: str = "", id: Option[str] = Nothing) -> Result[(), SseError]
+    def send_bytes(self: &mut EventStream[T], data: &Bytes, start: i64, stop: i64, deadline: &Deadline, event: str = "", id: Option[str] = Nothing) -> Result[(), SseError]
+    def comment(self: &mut EventStream[T], text: &str, deadline: &Deadline) -> Result[(), SseError]
+    def retry(self: &mut EventStream[T], milliseconds: i64, deadline: &Deadline) -> Result[(), SseError]
+    def wait(self: &mut EventStream[T], deadline: &Deadline) -> Result[(), SseError]
+    def close(self: &mut EventStream[T]) -> ()
+def head() -> Result[ResponseHead, HttpError]
+def accept[T: Transport](exchange: &mut Exchange[T]) -> Result[EventStream[T], SseError]
+def accept_with[T: Transport](exchange: &mut Exchange[T], head: ResponseHead) -> Result[EventStream[T], SseError]
+```
+
+## `std.http.tls`
+
+`std.http.server` over [`std.tls`](tls.md), with handshake deadlines. Errors: `ServerError`. [Reference](http-server.md#https).
+
+```text
+class TlsTransport
+    stream: TlsStream
+    def read_before(self: &mut TlsTransport, buffer: &mut Bytes, start: i64, stop: i64, deadline: &Deadline, cancel: &CancellationToken) -> Result[i64, NetError]
+    def write_before[S: ByteSource](self: &mut TlsTransport, source: &S, start: i64, stop: i64, deadline: &Deadline, cancel: &CancellationToken) -> Result[i64, NetError]
+    def shutdown(self: &mut TlsTransport, direction: Shutdown) -> Result[(), NetError]
+class TlsOpener
+    def open(self, tcp: TcpStream) -> Result[TlsTransport, OpenError]
+    def advance(self, stream: &mut TlsTransport, deadline: &Deadline, cancel: &CancellationToken) -> Result[(), OpenError]
+    def handshakes(self) -> bool
+    def watch(self, stream: &TlsTransport, selector: &mut Selector, key: u64) -> bool
+    def unwatch(self, stream: &TlsTransport, selector: &mut Selector) -> ()
+def serve[R, E, H: Handler[TlsTransport, R, E]](listener: TcpListener, tls: ServerConfig, router: &Router[R], handler: &H, config: &Config, stop: &CancellationToken) -> Result[Report, ServerError]
+```
+
+## `std.http.typed`
+
+Typed head parsing and writes, fixed/chunked/close-delimited bodies, and guarded connection recovery with concrete causes and progress. Errors: `FramingError[E]`, `Partial[E]`. [Reference](http-typed.md).
+
+```text
+enum FramingError[E]
+    Transport(E) | Truncated | InvalidProgress | OutOfRange | Broken | NotReusable | Protocol(HttpError)
+def read_request[E, R: Reader[E]](reader: &mut R, limits: &Limits) -> Result[Option[RequestHead], Partial[FramingError[E]]]
+def read_response[E, R: Reader[E]](reader: &mut R, limits: &Limits) -> Result[Option[ResponseHead], Partial[FramingError[E]]]
+def write_request[E, W: Writer[E]](writer: &mut W, head: &RequestHead) -> Result[(), Partial[FramingError[E]]]
+def write_response[E, W: Writer[E]](writer: &mut W, head: &ResponseHead) -> Result[(), Partial[FramingError[E]]]
+def write_last_chunk[E, W: Writer[E]](writer: &mut W, trailers: &list[Header]) -> Result[(), Partial[FramingError[E]]]
+def write_chunk[E, W: Writer[E]](writer: &mut W, source: &Bytes, start: i64, stop: i64) -> Result[(), Partial[FramingError[E]]]
+def fixed_body[E, R: Reader[E]](inner: R, length: i64) -> Result[FixedBody[E, R], FramingError[E]]
+class FixedBody[E, R]
+    def read(self: &mut FixedBody[E, R], buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StepError[FramingError[E]]]
+def chunked_body[E, R: Reader[E]](inner: R, limits: &Limits) -> Result[ChunkedBody[E, R], FramingError[E]]
+class ChunkedBody[E, R]
+    trailers: list[Header]
+    def total(self) -> i64
+    def is_done(self) -> bool
+    def read(self: &mut ChunkedBody[E, R], buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StepError[FramingError[E]]]
+def close_body[E, R: Reader[E]](inner: R) -> CloseBody[E, R]
+class CloseBody[E, R]
+    def read(self: &mut CloseBody[E, R], buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StepError[FramingError[E]]]
+def request_body[E, R: Reader[E]](inner: R, head: &RequestHead, limits: &Limits) -> Result[Body[E, R], FramingError[E]]
+def response_body[E, R: Reader[E]](inner: R, head: &ResponseHead, method: &str, request_keep_alive: bool, limits: &Limits) -> Result[Body[E, R], FramingError[E]]
+class Body[E, R]
+    def total(self) -> i64
+    def is_done(self) -> bool
+    def trailers(self) -> &list[Header]
+    def read(self: &mut Body[E, R], buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StepError[FramingError[E]]]
+    def finish(self: &mut Body[E, R]) -> Result[R, FramingError[E]]
+```
+
+## `std.http.websocket`
+
+RFC 6455 WebSocket connections: the handshake as a server exchange or a `ws` client, bounded framed messages, pings and the closing handshake. Errors: `WebSocketError`. [Reference](websocket.md).
+
+```text
+enum WebSocketError
+    Net(NetError) | Allocation(AllocError) | Http(HttpError) | Connect(ClientError) | Entropy(StreamError) | InvalidConfig | InvalidUrl | UnsupportedScheme | OutOfRange | Refused(i64) | Rejected(i64) | InvalidHandshake | Protocol | TooLarge | InvalidText | Closed | Stopping
+class Config
+    max_frame: i64
+    max_message: i64
+    subprotocol: Option[str]
+def config() -> Config
+enum Message
+    Text | Binary | Close(i64)
+enum Kind
+    Text | Binary
+class WebSocket[T]
+    subprotocol: Option[str]
+    def is_open(self) -> bool
+    def receive(self: &mut WebSocket[T], out: &mut Bytes, deadline: &Deadline) -> Result[Message, WebSocketError]
+    def send(self: &mut WebSocket[T], kind: Kind, data: &Bytes, start: i64, stop: i64, deadline: &Deadline) -> Result[(), WebSocketError]
+    def send_text(self: &mut WebSocket[T], text: &str, deadline: &Deadline) -> Result[(), WebSocketError]
+    def ping(self: &mut WebSocket[T], data: &Bytes, start: i64, stop: i64, deadline: &Deadline) -> Result[(), WebSocketError]
+    def close(self: &mut WebSocket[T], code: i64, reason: &str, deadline: &Deadline) -> Result[(), WebSocketError]
+def accept[T: Transport](exchange: &mut Exchange[T], config: &Config) -> Result[WebSocket[T], WebSocketError]
+class Target
+    secure: bool
+    host: str
+    port: u16
+def target(url: &str) -> Result[Target, WebSocketError]
+def dial(target: &Target, deadline: &Deadline, cancel: &CancellationToken) -> Result[TcpStream, WebSocketError]
+class Wire[T]
+    def read(self: &mut Wire[T], buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StreamError]
+def handshake[T: Transport](stream: T, target: &Target, config: &Config, deadline: &Deadline, cancel: &CancellationToken) -> Result[WebSocket[T], WebSocketError]
+def connect(url: &str, config: &Config, deadline: &Deadline, cancel: &CancellationToken) -> Result[WebSocket[TcpStream], WebSocketError]
+```
+
+## `std.http.wss`
+
+`std.http.websocket` clients for `wss` URLs through [`std.tls`](tls.md). Errors: `WebSocketError`. [Reference](websocket.md#wss).
+
+```text
+def connect(url: &str, tls: &ClientConfig, config: &Config, deadline: &Deadline, cancel: &CancellationToken) -> Result[WebSocket[TlsTransport], WebSocketError]
+```
+
+## `std.io`
+
+Partial-progress byte stream contracts, retry helpers, fixed-capacity buffering, and file, process-stream and memory adapters. Errors: `StreamError`, `Partial`, `CopyError`, `CloseError`. [Reference](io.md).
+
+```text
+enum StreamError
+    Interrupted | UnexpectedEof | WriteZero | OutOfRange | InvalidProgress | Io(IoError) | Allocation(AllocError)
+class Partial
+    completed: i64
+    cause: StreamError
+enum CopyError
+    Read(i64, StreamError) | Write(i64, StreamError)
+enum CloseError
+    Flush(StreamError) | Close(StreamError) | FlushAndClose(StreamError, StreamError)
+enum SeekFrom
+    Start(i64) | Current(i64) | End(i64)
+protocol Reader
+    def read(self: &mut Reader, buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StreamError]
+protocol Writer
+    def write[S: ByteSource](self: &mut Writer, source: &S, start: i64, stop: i64) -> Result[i64, StreamError]
+    def flush(self: &mut Writer) -> Result[(), StreamError]
+protocol Seeker
+    def seek(self: &mut Seeker, target: SeekFrom) -> Result[i64, StreamError]
+protocol Closer
+    def close(self: &mut Closer) -> Result[(), StreamError]
+def classify(error: IoError) -> StreamError
+def read_exact[R: Reader](reader: &mut R, buffer: &mut Bytes, start: i64, stop: i64) -> Result[(), Partial]
+def write_all[W: Writer, S: ByteSource](writer: &mut W, source: &S, start: i64, stop: i64) -> Result[(), Partial]
+def read_up_to[R: Reader](reader: &mut R, out: &mut Bytes, limit: i64) -> Result[i64, Partial]
+def copy_all[R: Reader, W: Writer](reader: &mut R, writer: &mut W, scratch: &mut Bytes) -> Result[i64, CopyError]
+class BufReader[R]
+    inner: R
+    def capacity(self) -> i64
+    def buffered(self) -> i64
+    def read(self: &mut BufReader[R], buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StreamError]
+    def read_until(self: &mut BufReader[R], delimiter: u8, out: &mut Bytes, limit: i64) -> Result[i64, StreamError]
+def buffered_reader[R](inner: R, capacity: i64) -> Result[BufReader[R], StreamError]
+def seek_reader[R: Seeker](reader: &mut BufReader[R], target: SeekFrom) -> Result[i64, StreamError]
+class BufWriter[W]
+    inner: W
+    def capacity(self) -> i64
+    def pending(self) -> i64
+    def write[S: ByteSource](self: &mut BufWriter[W], source: &S, start: i64, stop: i64) -> Result[i64, StreamError]
+    def flush(self: &mut BufWriter[W]) -> Result[(), StreamError]
+def buffered_writer[W](inner: W, capacity: i64) -> Result[BufWriter[W], StreamError]
+def seek_writer[W: Seeker](writer: &mut BufWriter[W], target: SeekFrom) -> Result[i64, StreamError]
+def close_buffered[W: Closer](writer: &mut BufWriter[W]) -> Result[(), CloseError]
+class Cursor
+    data: Bytes
+    def position(self) -> i64
+    def read(self: &mut Cursor, buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StreamError]
+    def write[S: ByteSource](self: &mut Cursor, source: &S, start: i64, stop: i64) -> Result[i64, StreamError]
+    def flush(self: &mut Cursor) -> Result[(), StreamError]
+    def seek(self: &mut Cursor, target: SeekFrom) -> Result[i64, StreamError]
+def cursor(data: Bytes) -> Cursor
+class FileStream
+    file: File
+    def read(self: &mut FileStream, buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StreamError]
+    def write[S: ByteSource](self: &mut FileStream, source: &S, start: i64, stop: i64) -> Result[i64, StreamError]
+    def flush(self: &mut FileStream) -> Result[(), StreamError]
+    def sync(self: &mut FileStream) -> Result[(), StreamError]
+    def seek(self: &mut FileStream, target: SeekFrom) -> Result[i64, StreamError]
+    def close(self: &mut FileStream) -> Result[(), StreamError]
+def open_file(path: &str, mode: &str) -> Result[FileStream, StreamError]
+def open_path(path: &Path, mode: &str) -> Result[FileStream, StreamError]
+def from_file(file: File) -> FileStream
+class Stdin
+    def is_terminal(self) -> bool
+    def read(self: &mut Stdin, buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StreamError]
+class Stdout
+    def is_terminal(self) -> bool
+    def write[S: ByteSource](self: &mut Stdout, source: &S, start: i64, stop: i64) -> Result[i64, StreamError]
+    def flush(self: &mut Stdout) -> Result[(), StreamError]
+class Stderr
+    def is_terminal(self) -> bool
+    def write[S: ByteSource](self: &mut Stderr, source: &S, start: i64, stop: i64) -> Result[i64, StreamError]
+    def flush(self: &mut Stderr) -> Result[(), StreamError]
+def stdin() -> Stdin
+def stdout() -> Stdout
+def stderr() -> Stderr
+```
+
+## `std.io.typed`
+
+Byte stream protocols that carry a caller-chosen error type, buffering, adapters for `std.io` streams, and exact read, write, and copy helpers. Errors: `StepError[E]`, `Partial[E]`, `CopyFailure[R, W]`. [Reference](io-typed.md).
+
+```text
+enum StepError[E]
+    Interrupted | Source(E)
+class LegacyReader[R]
+    def read(self: &mut LegacyReader[R], buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StepError[StreamError]]
+def reader[R: std.io.Reader](inner: R) -> LegacyReader[R]
+def unwrap_reader[R](reader: LegacyReader[R]) -> R
+class LegacyWriter[W]
+    def write(self: &mut LegacyWriter[W], buffer: &Bytes, start: i64, stop: i64) -> Result[i64, StepError[StreamError]]
+def writer[W: std.io.Writer](inner: W) -> LegacyWriter[W]
+def unwrap_writer[W](writer: LegacyWriter[W]) -> W
+protocol Reader[E]
+    def read(self: &mut Reader[E], buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StepError[E]]
+protocol Writer[E]
+    def write(self: &mut Writer[E], buffer: &Bytes, start: i64, stop: i64) -> Result[i64, StepError[E]]
+enum ReadFailure[E]
+    Source(E) | UnexpectedEof | InvalidProgress | OutOfRange
+class BufReader[E, R]
+    inner: R
+    def capacity(self) -> i64
+    def buffered(self) -> i64
+    def read(self: &mut BufReader[E, R], buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StepError[ReadFailure[E]]]
+def buffered_reader[E, R: Reader[E]](inner: R, capacity: i64) -> Result[BufReader[E, R], StreamError]
+enum WriteFailure[E]
+    Source(E) | WriteZero | InvalidProgress | OutOfRange
+class Partial[E]
+    completed: i64
+    cause: E
+enum CopyFailure[R, W]
+    Read(i64, ReadFailure[R]) | Write(i64, WriteFailure[W])
+def within(start: i64, stop: i64, size: i64) -> bool
+def read_exact[E, R: Reader[E]](reader: &mut R, buffer: &mut Bytes, start: i64, stop: i64) -> Result[(), Partial[ReadFailure[E]]]
+def write_all[E, W: Writer[E]](writer: &mut W, buffer: &Bytes, start: i64, stop: i64) -> Result[(), Partial[WriteFailure[E]]]
+def copy_all[E, G, R: Reader[E], W: Writer[G]](reader: &mut R, writer: &mut W, scratch: &mut Bytes) -> Result[i64, CopyFailure[E, G]]
+```
+
+## `std.json`
+
+Strict JSON under depth, input, and output limits: resumable event decoder, validating encoder, and a value tree. Errors: `JsonError`. [Reference](json.md).
+
+```text
+enum JsonFault
+    UnexpectedByte | UnexpectedEnd | TrailingData | InvalidLiteral | InvalidNumber | NumberOutOfRange | InvalidEscape | InvalidSurrogate | ControlCharacter | InvalidUtf8 | DuplicateKey | DepthExceeded | InputTooLarge | OutputTooLarge | NonFiniteNumber | InvalidState | InvalidLimits | OutOfRange | Stream(StreamError) | Allocation(AllocError)
+class JsonError
+    fault: JsonFault
+    offset: i64
+    line: i64
+    column: i64
+enum DuplicateKeys
+    Reject | Keep
+class Limits
+    max_depth: i64
+    max_input: i64
+    max_output: i64
+    duplicate_keys: DuplicateKeys
+enum Json
+    Null | Bool(bool) | Int(i64) | Float(f64) | Text(str) | Array(list[Json]) | Object(list[Member])
+class Member
+    key: str
+    value: Json
+enum Event
+    Pending | End | Null | Bool(bool) | Number(str) | Text(str) | Key(str) | StartArray | EndArray | StartObject | EndObject
+def limits() -> Limits
+class Decoder
+    def offset(self) -> i64
+    def depth(self) -> i64
+    def reject(self, fault: JsonFault) -> JsonError
+    def feed(self: &mut Decoder, source: &Bytes, start: i64, stop: i64) -> Result[(), JsonError]
+    def finish(self: &mut Decoder) -> ()
+    def next(self: &mut Decoder) -> Result[Event, JsonError]
+def decoder(bounds: &Limits) -> Result[Decoder, JsonError]
+def read_event[R: Reader](source: &mut Decoder, reader: &mut R) -> Result[Event, JsonError]
+def parse(source: &Bytes, bounds: &Limits) -> Result[Json, JsonError]
+def parse_text(text: &str, bounds: &Limits) -> Result[Json, JsonError]
+def read_value[R: Reader](reader: &mut R, bounds: &Limits) -> Result[Json, JsonError]
+def find(members: &list[Member], key: &str) -> Option[i64]
+class Encoder
+    def pending(self) -> i64
+    def written(self) -> i64
+    def is_complete(self) -> bool
+    def null(self: &mut Encoder) -> Result[(), JsonError]
+    def boolean(self: &mut Encoder, value: bool) -> Result[(), JsonError]
+    def integer(self: &mut Encoder, value: i64) -> Result[(), JsonError]
+    def unsigned(self: &mut Encoder, value: u64) -> Result[(), JsonError]
+    def decimal(self: &mut Encoder, value: f64) -> Result[(), JsonError]
+    def number(self: &mut Encoder, text: &str) -> Result[(), JsonError]
+    def text(self: &mut Encoder, value: &str) -> Result[(), JsonError]
+    def key(self: &mut Encoder, name: &str) -> Result[(), JsonError]
+    def start_array(self: &mut Encoder) -> Result[(), JsonError]
+    def end_array(self: &mut Encoder) -> Result[(), JsonError]
+    def start_object(self: &mut Encoder) -> Result[(), JsonError]
+    def end_object(self: &mut Encoder) -> Result[(), JsonError]
+    def event(self: &mut Encoder, event: &Event) -> Result[(), JsonError]
+    def value(self: &mut Encoder, value: &Json) -> Result[(), JsonError]
+    def take(self: &mut Encoder) -> Result[Bytes, JsonError]
+def encoder(bounds: &Limits) -> Result[Encoder, JsonError]
+def write_pending[W: Writer](source: &mut Encoder, writer: &mut W) -> Result[(), JsonError]
+def encode(value: &Json, bounds: &Limits) -> Result[Bytes, JsonError]
+def encode_text(value: &Json, bounds: &Limits) -> Result[str, JsonError]
+def write_value[W: Writer](writer: &mut W, value: &Json, bounds: &Limits) -> Result[(), JsonError]
+```
+
+## `std.log`
+
+Leveled events with typed fields, delivered to caller-chosen sinks: logfmt lines, bounded memory, or a nonblocking channel. Errors: `LogError`. [Reference](log.md).
+
+```text
+enum LogError
+    InvalidSpec | InvalidKey | UnknownLevel | TooLarge | Full | Closed | Format(FormatError) | Output(StreamError) | Allocation(AllocError)
+enum Level
+    Trace | Debug | Info | Warn | Error
+def level_name(level: &Level) -> str
+def parse_level(name: &str) -> Result[Level, LogError]
+enum Value
+    Text(str) | Integer(i64) | Unsigned(u64) | Floating(f64) | Boolean(bool)
+class Field
+    key: str
+    value: Value
+def text(key: str, value: str) -> Field
+def integer(key: str, value: i64) -> Field
+def unsigned(key: str, value: u64) -> Field
+def floating(key: str, value: f64) -> Field
+def boolean(key: str, value: bool) -> Field
+class Event
+    level: Level
+    message: str
+    fields: list[Field]
+    time: Option[Timestamp]
+def event(level: Level, message: str, fields: list[Field]) -> Event
+protocol Sink
+    def emit(self: &mut Sink, event: Event) -> Result[(), LogError]
+enum Clock
+    Off | Wall | Fixed(Timestamp)
+class Logger[S]
+    sink: S
+    def enabled(self, level: &Level) -> bool
+    def emitted(self) -> u64
+    def filtered(self) -> u64
+    def failed(self) -> u64
+    def emit(self: &mut Logger[S], event: Event) -> Result[(), LogError]
+    def log(self: &mut Logger[S], level: Level, message: str, fields: list[Field]) -> Result[(), LogError]
+    def debug(self: &mut Logger[S], message: str, fields: list[Field]) -> Result[(), LogError]
+    def info(self: &mut Logger[S], message: str, fields: list[Field]) -> Result[(), LogError]
+    def warn(self: &mut Logger[S], message: str, fields: list[Field]) -> Result[(), LogError]
+    def error(self: &mut Logger[S], message: str, fields: list[Field]) -> Result[(), LogError]
+def logger[S: Sink](sink: S, threshold: Level, clock: Clock) -> Logger[S]
+class LineBuffer
+    data: Bytes
+    def write[S: ByteSource](self: &mut LineBuffer, source: &S, start: i64, stop: i64) -> Result[i64, StreamError]
+    def flush(self: &mut LineBuffer) -> Result[(), StreamError]
+class TextSink[W]
+    writer: W
+    def emit(self: &mut TextSink[W], event: Event) -> Result[(), LogError]
+def text_sink[W: Writer](writer: W, max_line: i64) -> Result[TextSink[W], LogError]
+class MemorySink
+    events: list[Event]
+    def emit(self: &mut MemorySink, event: Event) -> Result[(), LogError]
+def memory_sink(capacity: i64) -> Result[MemorySink, LogError]
+class Discard
+    def emit(self: &mut Discard, event: Event) -> Result[(), LogError]
+def discard() -> Discard
+class ChannelSink
+    def share(self) -> ChannelSink
+    def emit(self: &mut ChannelSink, event: Event) -> Result[(), LogError]
+def channel_sink(sender: Sender[Event]) -> ChannelSink
+class Drained
+    delivered: u64
+    failed: u64
+def drain[S: Sink](receiver: &Receiver[Event], sink: &mut S) -> Drained
+```
+
+## `std.markdown`
+
+CommonMark 0.31.2 parsing into events and HTML rendering, under input, depth, and output limits. Errors: `MarkdownError`. [Reference](markdown.md).
+
+```text
+enum MarkdownFault
+    InvalidUtf8 | InputTooLarge | OutputTooLarge | DepthExceeded | InvalidLimits | InvalidState | Stream(StreamError) | Allocation(AllocError)
+class MarkdownError
+    fault: MarkdownFault
+    offset: i64
+    line: i64
+class Limits
+    max_input: i64
+    max_depth: i64
+    max_output: i64
+enum Tag
+    Paragraph | Heading(i64) | BlockQuote | CodeBlock(str) | BulletList | OrderedList(i64) | Item | Emphasis | Strong | Link(str, str) | Image(str, str)
+enum Event
+    Start(Tag) | End(Tag) | Text(str) | Code(str) | Html(str) | InlineHtml(str) | SoftBreak | HardBreak | Rule | Done
+def limits() -> Limits
+class Parser
+    def next(self: &mut Parser) -> Result[Event, MarkdownError]
+def parser(source: &Bytes, bounds: &Limits) -> Result[Parser, MarkdownError]
+def parser_text(text: &str, bounds: &Limits) -> Result[Parser, MarkdownError]
+class HtmlRenderer
+    def pending(self) -> i64
+    def written(self) -> i64
+    def event(self: &mut HtmlRenderer, event: &Event) -> Result[(), MarkdownError]
+    def take(self: &mut HtmlRenderer) -> Result[Bytes, MarkdownError]
+def renderer(bounds: &Limits) -> Result[HtmlRenderer, MarkdownError]
+def write_pending[W: Writer](source: &mut HtmlRenderer, writer: &mut W) -> Result[(), MarkdownError]
+def write_html[W: Writer](source: &mut Parser, writer: &mut W, bounds: &Limits) -> Result[(), MarkdownError]
+def render(source: &Bytes, bounds: &Limits) -> Result[Bytes, MarkdownError]
+def to_html(text: &str, bounds: &Limits) -> Result[str, MarkdownError]
+```
+
+## `std.template`
+
+Bounded Jinja-style text templates with explicit JSON values, HTML escaping, conditions, loops and named inheritance. Errors: `TemplateError`. [Reference](template.md).
+
+```text
+enum TemplateError
+    InvalidLimits | LimitExceeded | Syntax(i64) | UnknownTemplate(str) | DuplicateTemplate(str) | MissingValue(str) | TypeMismatch | InheritanceCycle | Allocation(AllocError) | Bytes(BytesError)
+class Limits
+    max_source: i64
+    max_tokens: i64
+    max_templates: i64
+    max_context_nodes: i64
+    max_context_bytes: i64
+    max_depth: i64
+    max_steps: i64
+    max_output: i64
+def limits() -> Limits
+class Engine
+    def add(self: &mut Engine, name: &str, source: &str) -> Result[(), TemplateError]
+    def render(self, name: &str, context: &Json, html: bool = True) -> Result[str, TemplateError]
+def engine(bounds: &Limits) -> Result[Engine, TemplateError]
+```
+
+## `std.math`
+
+Floating-point functions, checked rounding, integer algorithms, generic numeric helpers, and constants. Errors: `MathError`. [Reference](math.md).
+
+```text
+enum MathError
+    Domain | Overflow
+const pi: f64 = f64.PI
+const e: f64 = f64.E
+const tau: f64 = f64.TAU
+const inf: f64 = f64.INF
+const nan: f64 = f64.NAN
+def isnan(x: f64) -> bool
+def isinf(x: f64) -> bool
+def isfinite(x: f64) -> bool
+def fabs(x: f64) -> f64
+def copysign(x: f64, y: f64) -> f64
+def isclose(a: f64, b: f64, rel_tol: f64, abs_tol: f64) -> Result[bool, MathError]
+def degrees(x: f64) -> f64
+def radians(x: f64) -> f64
+def sqrt(x: f64) -> Result[f64, MathError]
+def exp(x: f64) -> Result[f64, MathError]
+def exp2(x: f64) -> Result[f64, MathError]
+def expm1(x: f64) -> Result[f64, MathError]
+def log(x: f64) -> Result[f64, MathError]
+def log2(x: f64) -> Result[f64, MathError]
+def log10(x: f64) -> Result[f64, MathError]
+def log1p(x: f64) -> Result[f64, MathError]
+def log_base(x: f64, base: f64) -> Result[f64, MathError]
+def sin(x: f64) -> Result[f64, MathError]
+def cos(x: f64) -> Result[f64, MathError]
+def tan(x: f64) -> Result[f64, MathError]
+def asin(x: f64) -> Result[f64, MathError]
+def acos(x: f64) -> Result[f64, MathError]
+def atan(x: f64) -> Result[f64, MathError]
+def atan2(y: f64, x: f64) -> Result[f64, MathError]
+def sinh(x: f64) -> Result[f64, MathError]
+def cosh(x: f64) -> Result[f64, MathError]
+def tanh(x: f64) -> Result[f64, MathError]
+def asinh(x: f64) -> Result[f64, MathError]
+def acosh(x: f64) -> Result[f64, MathError]
+def atanh(x: f64) -> Result[f64, MathError]
+def cbrt(x: f64) -> Result[f64, MathError]
+def pow(x: f64, y: f64) -> Result[f64, MathError]
+def fmod(x: f64, y: f64) -> Result[f64, MathError]
+def floor(x: f64) -> Result[i64, MathError]
+def ceil(x: f64) -> Result[i64, MathError]
+def trunc(x: f64) -> Result[i64, MathError]
+def round(x: f64) -> Result[i64, MathError]
+def divmod[T: IntType](a: T, b: T) -> Result[(T, T), MathError]
+def divmod_float(a: f64, b: f64) -> Result[(f64, f64), MathError]
+def factorial(n: i64) -> Result[u64, MathError]
+def gcd(a: u64, b: u64) -> u64
+def lcm(a: u64, b: u64) -> Result[u64, MathError]
+def isqrt(n: u64) -> u64
+def perm(n: u64, k: u64) -> Result[u64, MathError]
+def comb(n: u64, k: u64) -> Result[u64, MathError]
+def abs[T](x: T) -> T
+def min[T](a: T, b: T) -> T
+def max[T](a: T, b: T) -> T
+def min_all[T](items: &list[T]) -> Option[T]
+def max_all[T](items: &list[T]) -> Option[T]
+def sum[T](items: &list[T], start: T) -> T
+def prod[T](items: &list[T], start: T) -> T
+def sum_iter[I, T](items: &I, start: T) -> T
+def prod_iter[I, T](items: &I, start: T) -> T
+```
+
+## `std.net`
+
+TCP listeners and streams, UDP sockets, IP addresses and name lookup, with deadlines and cancellation. Errors: `NetError`. [Reference](net.md).
+
+```text
+enum NetError
+    TimedOut | ConnectionTimedOut | WouldBlock | Cancelled | Refused | Reset | AddressInUse | AddressUnavailable | Unreachable | NameNotFound | TryAgain | InvalidAddress | HandleLimit | Stream(StreamError)
+enum IpAddress
+    V4(u32) | V6(u64, u64)
+class SocketAddress
+    ip: IpAddress
+    port: u16
+    scope: u32
+    def format(self) -> Result[str, NetError]
+def socket_address(ip: IpAddress, port: u16) -> SocketAddress
+def ipv4(a: u8, b: u8, c: u8, d: u8) -> IpAddress
+def loopback_v4(port: u16) -> SocketAddress
+def loopback_v6(port: u16) -> SocketAddress
+def any_v4(port: u16) -> SocketAddress
+def any_v6(port: u16) -> SocketAddress
+def format_ip(ip: IpAddress) -> Result[str, NetError]
+def parse_ip(text: &str) -> Result[IpAddress, NetError]
+def parse_address(text: &str) -> Result[SocketAddress, NetError]
+def resolve(host: &str, port: u16, deadline: &Deadline, cancel: &CancellationToken) -> Result[list[SocketAddress], NetError]
+class Lookup
+    def descriptor(self) -> &File
+    def watch(self, selector: &mut Selector, key: u64) -> Result[(), NetError]
+    def unwatch(self, selector: &mut Selector) -> Result[(), NetError]
+    def finish_now(self: &mut Lookup) -> Result[list[SocketAddress], NetError]
+def start_lookup(host: &str, port: u16) -> Result[Lookup, NetError]
+enum Shutdown
+    Read | Write | Both
+class TcpStream
+    def read(self: &mut TcpStream, buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StreamError]
+    def write[S: ByteSource](self: &mut TcpStream, source: &S, start: i64, stop: i64) -> Result[i64, StreamError]
+    def flush(self: &mut TcpStream) -> Result[(), StreamError]
+    def close(self: &mut TcpStream) -> Result[(), StreamError]
+    def read_now(self: &mut TcpStream, buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, NetError]
+    def write_now[S: ByteSource](self: &mut TcpStream, source: &S, start: i64, stop: i64) -> Result[i64, NetError]
+    def read_before(self: &mut TcpStream, buffer: &mut Bytes, start: i64, stop: i64, deadline: &Deadline, cancel: &CancellationToken) -> Result[i64, NetError]
+    def write_before[S: ByteSource](self: &mut TcpStream, source: &S, start: i64, stop: i64, deadline: &Deadline, cancel: &CancellationToken) -> Result[i64, NetError]
+    def write_all_before[S: ByteSource](self: &mut TcpStream, source: &S, start: i64, stop: i64, deadline: &Deadline, cancel: &CancellationToken) -> Result[(), NetError]
+    def local_address(self) -> Result[SocketAddress, NetError]
+    def peer_address(self) -> Result[SocketAddress, NetError]
+    def shutdown(self: &mut TcpStream, direction: Shutdown) -> Result[(), NetError]
+    def descriptor(self) -> &File
+    def watch(self, selector: &mut Selector, key: u64, interest: Interest) -> Result[(), NetError]
+    def unwatch(self, selector: &mut Selector) -> Result[(), NetError]
+    def set_no_delay(self: &mut TcpStream, enabled: bool) -> Result[(), NetError]
+    def acknowledge_now(self: &mut TcpStream) -> Result[(), NetError]
+class TcpListener
+    def local_address(self) -> Result[SocketAddress, NetError]
+    def descriptor(self) -> &File
+    def watch(self, selector: &mut Selector, key: u64) -> Result[(), NetError]
+    def unwatch(self, selector: &mut Selector) -> Result[(), NetError]
+    def accept_now(self) -> Result[TcpStream, NetError]
+    def accept(self, deadline: &Deadline, cancel: &CancellationToken) -> Result[TcpStream, NetError]
+    def close(self: &mut TcpListener) -> Result[(), NetError]
+def listen(address: &SocketAddress, backlog: i64) -> Result[TcpListener, NetError]
+def connect(address: &SocketAddress, deadline: &Deadline, cancel: &CancellationToken) -> Result[TcpStream, NetError]
+class Connecting
+    def descriptor(self) -> &File
+    def watch(self, selector: &mut Selector, key: u64) -> Result[(), NetError]
+    def unwatch(self, selector: &mut Selector) -> Result[(), NetError]
+    def finish_now(self: &mut Connecting) -> Result[(), NetError]
+    def stream(self: Connecting) -> TcpStream
+def start_connect(address: &SocketAddress) -> Result[Connecting, NetError]
+class Datagram
+    size: i64
+    stored: i64
+    source: SocketAddress
+    def truncated(self) -> bool
+class UdpSocket
+    def local_address(self) -> Result[SocketAddress, NetError]
+    def descriptor(self) -> &File
+    def watch(self, selector: &mut Selector, key: u64, interest: Interest) -> Result[(), NetError]
+    def unwatch(self, selector: &mut Selector) -> Result[(), NetError]
+    def set_broadcast(self: &mut UdpSocket, enabled: bool) -> Result[(), NetError]
+    def send_to[S: ByteSource](self: &mut UdpSocket, source: &S, start: i64, stop: i64, target: &SocketAddress, deadline: &Deadline, cancel: &CancellationToken) -> Result[i64, NetError]
+    def receive_from(self: &mut UdpSocket, buffer: &mut Bytes, start: i64, stop: i64, deadline: &Deadline, cancel: &CancellationToken) -> Result[Datagram, NetError]
+    def close(self: &mut UdpSocket) -> Result[(), NetError]
+def bind_udp(address: &SocketAddress) -> Result[UdpSocket, NetError]
+```
+
+## `std.path`
+
+Lossless Linux paths, lexical operations, checked text conversion and escaped display. Errors: `IoError`, `AllocError`. [Reference](path.md).
+
+```text
+class Path
+    def as_bytes(self) -> &list[u8]
+    def to_text(self) -> Result[str, IoError]
+    def display(self) -> Result[str, IoError]
+    def copy(self) -> Result[Path, AllocError]
+    def join(self, child: &Path) -> Result[Path, IoError]
+    def is_absolute(self) -> bool
+    def parent(self) -> Result[Option[Path], IoError]
+    def file_name(self) -> Result[Option[Path], IoError]
+    def components(self) -> Result[list[list[u8]], IoError]
+def from_bytes(bytes: list[u8]) -> Path
+def from_text(text: &str) -> Result[Path, IoError]
+```
+
+## `std.process`
+
+Children spawned from an argument vector with no implicit shell, piped streams, bounded output collection, signals, and explicit reaping. Errors: `IoError`, `StreamError`. [Reference](process.md).
+
+```text
+enum Stdio
+    Inherit | Null | Piped
+class ExitStatus
+    def success(self) -> bool
+    def code(self) -> Option[i32]
+    def signal(self) -> Option[i32]
+class Output
+    status: ExitStatus
+    stdout: Bytes
+    stderr: Bytes
+class Command
+    def arg_bytes(self: &mut Command, value: &list[u8]) -> Result[(), IoError]
+    def arg(self: &mut Command, value: &str) -> Result[(), IoError]
+    def arg_path(self: &mut Command, value: &Path) -> Result[(), IoError]
+    def env_bytes(self: &mut Command, name: &list[u8], value: &list[u8]) -> Result[(), IoError]
+    def env(self: &mut Command, name: &str, value: &str) -> Result[(), IoError]
+    def env_remove_bytes(self: &mut Command, name: &list[u8]) -> Result[(), IoError]
+    def env_remove(self: &mut Command, name: &str) -> Result[(), IoError]
+    def env_clear(self: &mut Command) -> ()
+    def current_dir(self: &mut Command, path: &Path) -> Result[(), IoError]
+    def stdin(self: &mut Command, mode: Stdio) -> ()
+    def stdout(self: &mut Command, mode: Stdio) -> ()
+    def stderr(self: &mut Command, mode: Stdio) -> ()
+    def spawn(self) -> Result[Child, IoError]
+def command_bytes(program: &list[u8]) -> Result[Command, IoError]
+def command(program: &str) -> Result[Command, IoError]
+def shell(script: &str) -> Result[Command, IoError]
+class Child
+    def id(self) -> i64
+    def take_stdin(self: &mut Child) -> Option[File]
+    def take_stdout(self: &mut Child) -> Option[File]
+    def take_stderr(self: &mut Child) -> Option[File]
+    def close_stdin(self: &mut Child) -> Result[(), IoError]
+    def wait(self: &mut Child) -> Result[ExitStatus, IoError]
+    def try_wait(self: &mut Child) -> Result[Option[ExitStatus], IoError]
+    def wait_timeout(self: &mut Child, budget: &Duration) -> Result[Option[ExitStatus], IoError]
+    def signal(self, number: i32) -> Result[(), IoError]
+    def terminate(self) -> Result[(), IoError]
+    def kill(self) -> Result[(), IoError]
+    def communicate(self: &mut Child, input: &Bytes, limit: i64) -> Result[Output, StreamError]
+    def output(self: &mut Child, limit: i64) -> Result[Output, StreamError]
+```
+
+## `std.random`
+
+Caller-owned seeded generators with unbiased ranges, shuffling, and index sampling; not for secrets. Errors: `RandomError`. [Reference](random.md).
+
+```text
+enum RandomError
+    EmptyRange | OutOfRange | ZeroState | Allocation(AllocError)
+class Rng
+    def next_u64(self: &mut Rng) -> u64
+    def next_u32(self: &mut Rng) -> u32
+    def next_bool(self: &mut Rng) -> bool
+    def next_f64(self: &mut Rng) -> f64
+    def below(self: &mut Rng, bound: u64) -> Result[u64, RandomError]
+    def between(self: &mut Rng, low: i64, high: i64) -> Result[i64, RandomError]
+    def index(self: &mut Rng, count: i64) -> Result[i64, RandomError]
+    def shuffle[T](self: &mut Rng, items: &mut list[T]) -> ()
+    def sample_indices(self: &mut Rng, count: i64, amount: i64) -> Result[list[i64], RandomError]
+    def fill(self: &mut Rng, target: &mut Bytes, start: i64, stop: i64) -> Result[(), RandomError]
+    def state(self) -> (u64, u64, u64, u64)
+def seeded(seed: u64) -> Rng
+def from_state(a: u64, b: u64, c: u64, d: u64) -> Result[Rng, RandomError]
+```
+
+## `std.ready`
+
+Readiness waits on pipes and other handles, bounded by a deadline and a cancellation token. Errors: `WaitError`. [Reference](ready.md).
+
+```text
+enum Interest
+    Read | Write | ReadWrite
+class Readiness
+    readable: bool
+    writable: bool
+    hangup: bool
+    error: bool
+enum WaitError
+    TimedOut | Cancelled | Stream(StreamError)
+def wait_until(file: &File, interest: Interest, deadline: &Deadline) -> Result[Readiness, WaitError]
+def wait(file: &File, interest: Interest, deadline: &Deadline, cancel: &CancellationToken) -> Result[Readiness, WaitError]
+def read_before(stream: &mut FileStream, buffer: &mut Bytes, start: i64, stop: i64, deadline: &Deadline, cancel: &CancellationToken) -> Result[i64, WaitError]
+def write_before[S: ByteSource](stream: &mut FileStream, source: &S, start: i64, stop: i64, deadline: &Deadline, cancel: &CancellationToken) -> Result[i64, WaitError]
+protocol Watchable
+    def descriptor(self) -> &File
+class Event
+    key: u64
+    readiness: Readiness
+class Selector
+    def watch(self: &mut Selector, file: &File, key: u64, interest: Interest) -> Result[(), WaitError]
+    def unwatch(self: &mut Selector, file: &File) -> Result[(), WaitError]
+    def wait(self: &mut Selector, deadline: &Deadline, cancel: &CancellationToken) -> Result[i64, WaitError]
+    def event(self, index: i64) -> Result[Event, WaitError]
+    def close(self: &mut Selector) -> Result[(), WaitError]
+def selector(capacity: i64) -> Result[Selector, WaitError]
+```
+
+## `std.regex`
+
+Linear-time regular expressions over text and bytes: search, captures, iteration, split, and replacement under explicit pattern, memory, and work limits. Errors: `RegexError`. [Reference](regex.md).
+
+```text
+enum Limit
+    PatternBytes | Nesting | Repetition | Instructions | Memory | Work | Output | Matches
+class SyntaxError
+    offset: i64
+    message: str
+enum RegexError
+    Syntax(SyntaxError) | LimitExceeded(Limit) | InvalidLimits | OutOfRange | Allocation(AllocError)
+class Limits
+    max_pattern_bytes: i64
+    max_nesting: i64
+    max_repeat: i64
+    max_instructions: i64
+    max_memory: i64
+    max_work: i64
+def limits() -> Limits
+class Match
+    start: i64
+    end: i64
+    def len(self) -> i64
+    def is_empty(self) -> bool
+    def text(self, haystack: &str) -> Result[str, RegexError]
+    def bytes(self, data: &Bytes) -> Result[Bytes, RegexError]
+class Captures
+    def len(self) -> i64
+    def get(self, index: i64) -> Option[Match]
+    def name(self, name: &str) -> Option[Match]
+class Cursor
+class Regex
+    def group_count(self) -> i64
+    def group_index(self, name: &str) -> Option[i64]
+    def instructions(self) -> i64
+    def is_match(self, text: &str) -> Result[bool, RegexError]
+    def is_match_bytes(self, data: &Bytes) -> Result[bool, RegexError]
+    def find(self, text: &str) -> Result[Option[Match], RegexError]
+    def find_at(self, text: &str, start: i64) -> Result[Option[Match], RegexError]
+    def find_bytes(self, data: &Bytes, start: i64) -> Result[Option[Match], RegexError]
+    def captures(self, text: &str) -> Result[Option[Captures], RegexError]
+    def captures_at(self, text: &str, start: i64) -> Result[Option[Captures], RegexError]
+    def captures_bytes(self, data: &Bytes, start: i64) -> Result[Option[Captures], RegexError]
+    def cursor(self) -> Result[Cursor, RegexError]
+    def next_match(self, text: &str, cursor: &mut Cursor) -> Result[Option[Match], RegexError]
+    def next_match_bytes(self, data: &Bytes, cursor: &mut Cursor) -> Result[Option[Match], RegexError]
+    def find_all(self, text: &str, max_matches: i64) -> Result[list[Match], RegexError]
+    def find_all_bytes(self, data: &Bytes, max_matches: i64) -> Result[list[Match], RegexError]
+    def split(self, text: &str, max_pieces: i64) -> Result[list[str], RegexError]
+    def replace(self, text: &str, template: &str, max_bytes: i64) -> Result[str, RegexError]
+    def replace_all(self, text: &str, template: &str, max_bytes: i64) -> Result[str, RegexError]
+def compile(pattern: &str, bounds: &Limits) -> Result[Regex, RegexError]
+```
+
+## `std.report`
+
+A bounded formatter for human-readable reports, to standard error or an owned collector. Errors: `FormatError`. [Reference](report.md).
+
+```text
+enum FormatError
+    InvalidSpec | LimitExceeded | RecursionLimit | Bytes(BytesError) | Output(IoError) | WriteZero | OutputClosed
+class Formatter
+    def completed(self) -> i64
+    def failed(self) -> bool
+    def text(self: &mut Formatter, value: &str) -> Result[(), FormatError]
+    def boolean(self: &mut Formatter, value: bool) -> Result[(), FormatError]
+    def unsigned(self: &mut Formatter, value: u64, base: i64) -> Result[(), FormatError]
+    def integer(self: &mut Formatter, value: i64) -> Result[(), FormatError]
+    def enter(self: &mut Formatter) -> Result[(), FormatError]
+    def leave(self: &mut Formatter) -> ()
+protocol Formattable
+    def format(self, output: &mut Formatter) -> Result[(), FormatError]
+def stderr_formatter(max_bytes: i64, max_depth: i64) -> Result[Formatter, FormatError]
+def string_formatter(max_bytes: i64, max_depth: i64) -> Result[Formatter, FormatError]
+def finish(output: &Formatter) -> Result[str, FormatError]
+def render[T: Formattable](value: &T, output: &mut Formatter) -> Result[(), FormatError]
+def to_string[T: Formattable](value: &T, max_bytes: i64, max_depth: i64) -> Result[str, FormatError]
+```
+
+## `std.secrets`
+
+Operating-system entropy: secret bytes, hex and base64url tokens, and unbiased integers, with no fallback source. Errors: `SecretsError`. [Reference](secrets.md).
+
+```text
+enum SecretsError
+    OutOfRange | EmptyRange | Entropy(StreamError) | Allocation(AllocError)
+class OsEntropy
+    def read(self: &mut OsEntropy, buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StreamError]
+def os_entropy() -> OsEntropy
+class Source[R]
+    inner: R
+    def fill(self: &mut Source[R], target: &mut Bytes, start: i64, stop: i64) -> Result[(), SecretsError]
+    def token_bytes(self: &mut Source[R], count: i64) -> Result[Bytes, SecretsError]
+    def token_hex(self: &mut Source[R], count: i64) -> Result[str, SecretsError]
+    def token_urlsafe(self: &mut Source[R], count: i64) -> Result[str, SecretsError]
+    def next_u64(self: &mut Source[R]) -> Result[u64, SecretsError]
+    def below(self: &mut Source[R], bound: u64) -> Result[u64, SecretsError]
+def source_from[R: Reader](inner: R) -> Source[R]
+def os() -> Source[OsEntropy]
+def fill(target: &mut Bytes, start: i64, stop: i64) -> Result[(), SecretsError]
+def token_bytes(count: i64) -> Result[Bytes, SecretsError]
+def token_hex(count: i64) -> Result[str, SecretsError]
+def token_urlsafe(count: i64) -> Result[str, SecretsError]
+def random_u64() -> Result[u64, SecretsError]
+def below(bound: u64) -> Result[u64, SecretsError]
+```
+
+## `std.shlex`
+
+Shell-style word splitting and POSIX argument quoting, without execution or expansion. Errors: `ShlexError`, `AllocError`. [Reference](shlex.md).
+
+```text
+enum ShlexError
+    UnclosedQuote(i64) | TrailingEscape(i64) | Nul(i64)
+def split(text: &str, comments: bool = False) -> Result[list[str], ShlexError | AllocError]
+def quote(text: &str) -> Result[str, ShlexError | AllocError]
+```
+
+## `std.sketch`
+
+Bounded distinct counts, sampled quantiles and frequent-item bounds with versioned checkpoints. Errors: `SketchError`, `AllocError`, `BytesError`. [Reference](sketch.md).
+
+```text
+enum SketchError
+    InvalidArgument | InvalidData | Incompatible | Empty | Limit | ConstructionFailed
+def hash_u64(key: u64, seed: u64 = 0u64) -> u64
+class HyperLogLog
+    def precision(self) -> i64
+    def add(self: &mut HyperLogLog, key: u64) -> ()
+    def estimate(self) -> f64
+    def relative_standard_error(self) -> f64
+    def merge(self: &mut HyperLogLog, other: &HyperLogLog) -> Result[(), SketchError]
+    def to_bytes(self) -> Result[Bytes, BytesError]
+def hyperloglog(precision: i64 = 12, seed: u64 = 0u64) -> Result[HyperLogLog, SketchError | BytesError]
+def hyperloglog_from_bytes[S: ByteSource](data: &S, max_precision: i64 = 18) -> Result[HyperLogLog, SketchError | BytesError]
+class Quantiles
+    def count(self) -> u64
+    def retained(self) -> i64
+    def add(self: &mut Quantiles, value: f64) -> Result[(), SketchError | AllocError]
+    def quantile(self, fraction: f64) -> Result[f64, SketchError]
+    def to_bytes(self) -> Result[Bytes, BytesError]
+def quantiles(capacity: i64 = 1024, seed: u64 = 0u64) -> Result[Quantiles, SketchError | AllocError]
+def quantiles_from_bytes(data: &Bytes, max_capacity: i64 = 1048576) -> Result[Quantiles, SketchError | BytesError | AllocError]
+class Frequency
+    key: u64
+    lower: u64
+    upper: u64
+class FrequentItems
+    def count(self) -> u64
+    def error_bound(self) -> u64
+    def add(self: &mut FrequentItems, key: u64) -> Result[(), SketchError]
+    def frequency(self, key: u64) -> Frequency
+    def candidates(self) -> Result[list[Frequency], AllocError]
+    def to_bytes(self) -> Result[Bytes, BytesError]
+def frequent_items(capacity: i64 = 128) -> Result[FrequentItems, SketchError | AllocError]
+def frequent_items_from_bytes[S: ByteSource](data: &S, max_capacity: i64 = 65536) -> Result[FrequentItems, SketchError | AllocError]
+```
+
+## `std.sketch.xor`
+
+Static approximate membership over numeric identities with bounded construction. Errors: `SketchError`, `AllocError`, `BytesError`. [Reference](sketch-xor.md).
+
+```text
+class XorFilter
+    def len(self) -> i64
+    def contains(self, key: u64) -> bool
+    def to_bytes(self) -> Result[Bytes, BytesError]
+def build(keys: &list[u64], max_keys: i64, seed: u64 = 0u64) -> Result[XorFilter, SketchError | AllocError | BytesError]
+def from_bytes[S: ByteSource](data: &S, max_keys: i64) -> Result[XorFilter, SketchError | BytesError]
+```
+
+## `std.sketch.cuckoo`
+
+Scalable approximate membership with bounded growth and receipt-directed deletion. Errors: `SketchError`, `AllocError`, `BytesError`. [Reference](sketch-cuckoo.md).
+
+```text
+class CuckooFilter
+    def len(self) -> u64
+    def layers(self) -> i64
+    def buckets(self) -> i64
+    def contains(self, key: u64) -> bool
+    def insert(self: &mut CuckooFilter, key: u64) -> Result[i64, SketchError | AllocError | BytesError]
+    def remove(self: &mut CuckooFilter, key: u64, layer_index: i64) -> Result[bool, SketchError]
+    def to_bytes(self) -> Result[Bytes, BytesError]
+def cuckoo(initial_buckets: i64 = 64, max_buckets: i64 = 1048576, seed: u64 = 0u64) -> Result[CuckooFilter, SketchError | AllocError | BytesError]
+def from_bytes[S: ByteSource](data: &S, max_buckets: i64) -> Result[CuckooFilter, SketchError | AllocError | BytesError]
+```
+
+## `std.signal`
+
+`SIGTERM` and `SIGINT` as an event to wait or select on, and a helper that cancels a token on one. Errors: `SignalError`, `WaitError`. [Reference](signal.md).
+
+```text
+enum Signal
+    Interrupt | Terminate
+enum SignalError
+    AlreadyListening | Stream(StreamError)
+class Signals
+    def wait(self: &mut Signals, deadline: &Deadline, cancel: &CancellationToken) -> Result[Signal, WaitError]
+    def received(self: &mut Signals) -> Result[Option[Signal], WaitError]
+    def watch(self, selector: &mut Selector, key: u64) -> Result[(), WaitError]
+    def unwatch(self, selector: &mut Selector) -> Result[(), WaitError]
+    def close(self: &mut Signals) -> Result[(), WaitError]
+def listen() -> Result[Signals, SignalError]
+def cancel_on(signals: Signals, stop: CancellationToken) -> Result[Option[Signal], WaitError]
+```
+
+## `std.simd`
+
+Portable fixed-lane values, masks, checked and wrapping arithmetic, selection, and bounded list loads/stores. [Reference](simd.md).
+
+```text
+enum i32x4
+    Lanes(i32, i32, i32, i32)
+    def lane(self, index: i64) -> Option[i32]
+    def to_tuple(self) -> (i32, i32, i32, i32)
+    def add(self, other: &i32x4) -> i32x4
+    def sub(self, other: &i32x4) -> i32x4
+    def mul(self, other: &i32x4) -> i32x4
+    def wrapping_add(self, other: &i32x4) -> i32x4
+    def wrapping_sub(self, other: &i32x4) -> i32x4
+    def wrapping_mul(self, other: &i32x4) -> i32x4
+    def simd_eq(self, other: &i32x4) -> mask32x4
+    def simd_ne(self, other: &i32x4) -> mask32x4
+    def simd_lt(self, other: &i32x4) -> mask32x4
+    def simd_le(self, other: &i32x4) -> mask32x4
+    def simd_gt(self, other: &i32x4) -> mask32x4
+    def simd_ge(self, other: &i32x4) -> mask32x4
+    def wrapping_sum(self) -> i32
+    def store(self, values: &mut list[i32], offset: i64) -> bool
+def splat_i32x4(value: i32) -> i32x4
+def load_i32x4(values: &list[i32], offset: i64 = 0) -> Option[i32x4]
+enum u32x4
+    Lanes(u32, u32, u32, u32)
+    def lane(self, index: i64) -> Option[u32]
+    def to_tuple(self) -> (u32, u32, u32, u32)
+    def add(self, other: &u32x4) -> u32x4
+    def sub(self, other: &u32x4) -> u32x4
+    def mul(self, other: &u32x4) -> u32x4
+    def wrapping_add(self, other: &u32x4) -> u32x4
+    def wrapping_sub(self, other: &u32x4) -> u32x4
+    def wrapping_mul(self, other: &u32x4) -> u32x4
+    def simd_eq(self, other: &u32x4) -> mask32x4
+    def simd_ne(self, other: &u32x4) -> mask32x4
+    def simd_lt(self, other: &u32x4) -> mask32x4
+    def simd_le(self, other: &u32x4) -> mask32x4
+    def simd_gt(self, other: &u32x4) -> mask32x4
+    def simd_ge(self, other: &u32x4) -> mask32x4
+    def wrapping_sum(self) -> u32
+    def store(self, values: &mut list[u32], offset: i64) -> bool
+def splat_u32x4(value: u32) -> u32x4
+def load_u32x4(values: &list[u32], offset: i64 = 0) -> Option[u32x4]
+enum f32x4
+    Lanes(f32, f32, f32, f32)
+    def lane(self, index: i64) -> Option[f32]
+    def to_tuple(self) -> (f32, f32, f32, f32)
+    def add(self, other: &f32x4) -> f32x4
+    def sub(self, other: &f32x4) -> f32x4
+    def mul(self, other: &f32x4) -> f32x4
+    def div(self, other: &f32x4) -> f32x4
+    def simd_eq(self, other: &f32x4) -> mask32x4
+    def simd_ne(self, other: &f32x4) -> mask32x4
+    def simd_lt(self, other: &f32x4) -> mask32x4
+    def simd_le(self, other: &f32x4) -> mask32x4
+    def simd_gt(self, other: &f32x4) -> mask32x4
+    def simd_ge(self, other: &f32x4) -> mask32x4
+    def sum_ordered(self, initial: f32) -> f32
+    def store(self, values: &mut list[f32], offset: i64) -> bool
+def splat_f32x4(value: f32) -> f32x4
+def load_f32x4(values: &list[f32], offset: i64 = 0) -> Option[f32x4]
+enum f64x2
+    Lanes(f64, f64)
+    def lane(self, index: i64) -> Option[f64]
+    def to_tuple(self) -> (f64, f64)
+    def add(self, other: &f64x2) -> f64x2
+    def sub(self, other: &f64x2) -> f64x2
+    def mul(self, other: &f64x2) -> f64x2
+    def div(self, other: &f64x2) -> f64x2
+    def simd_eq(self, other: &f64x2) -> mask64x2
+    def simd_ne(self, other: &f64x2) -> mask64x2
+    def simd_lt(self, other: &f64x2) -> mask64x2
+    def simd_le(self, other: &f64x2) -> mask64x2
+    def simd_gt(self, other: &f64x2) -> mask64x2
+    def simd_ge(self, other: &f64x2) -> mask64x2
+    def sum_ordered(self, initial: f64) -> f64
+    def store(self, values: &mut list[f64], offset: i64) -> bool
+def splat_f64x2(value: f64) -> f64x2
+def load_f64x2(values: &list[f64], offset: i64 = 0) -> Option[f64x2]
+enum mask32x4
+    Lanes(bool, bool, bool, bool)
+    def any(self) -> bool
+    def all(self) -> bool
+    def count(self) -> i64
+    def select[T](self, yes: &T, no: &T) -> T
+    def invert(self) -> mask32x4
+    def and_mask(self, other: &mask32x4) -> mask32x4
+    def or_mask(self, other: &mask32x4) -> mask32x4
+    def xor_mask(self, other: &mask32x4) -> mask32x4
+enum mask64x2
+    Lanes(bool, bool)
+    def any(self) -> bool
+    def all(self) -> bool
+    def count(self) -> i64
+    def select[T](self, yes: &T, no: &T) -> T
+    def invert(self) -> mask64x2
+    def and_mask(self, other: &mask64x2) -> mask64x2
+    def or_mask(self, other: &mask64x2) -> mask64x2
+    def xor_mask(self, other: &mask64x2) -> mask64x2
+```
+
+## `std.stat`
+
+Descriptive f64 statistics, inclusive quantiles, and normal, uniform and exponential distributions with explicit RNG sampling. Errors: `StatError`. [Reference](stat.md).
+
+```text
+enum StatError
+    Empty | InsufficientData | NonFinite | Domain | Overflow | Allocation(AllocError)
+def mean(values: &list[f64]) -> Result[f64, StatError]
+def pstdev(values: &list[f64]) -> Result[f64, StatError]
+def stdev(values: &list[f64]) -> Result[f64, StatError]
+def pvariance(values: &list[f64]) -> Result[f64, StatError]
+def variance(values: &list[f64]) -> Result[f64, StatError]
+def quantile(values: &list[f64], p: f64) -> Result[f64, StatError]
+def median(values: &list[f64]) -> Result[f64, StatError]
+def quantiles(values: &list[f64], n: i64 = 4) -> Result[list[f64], StatError]
+class Uniform
+    def pdf(self, x: f64) -> Result[f64, StatError]
+    def cdf(self, x: f64) -> Result[f64, StatError]
+    def inverse_cdf(self, p: f64) -> Result[f64, StatError]
+    def sample(self, rng: &mut random.Rng) -> f64
+def uniform(low: f64 = 0.0, high: f64 = 1.0) -> Result[Uniform, StatError]
+class Exponential
+    def pdf(self, x: f64) -> Result[f64, StatError]
+    def cdf(self, x: f64) -> Result[f64, StatError]
+    def inverse_cdf(self, p: f64) -> Result[f64, StatError]
+    def sample(self, rng: &mut random.Rng) -> Result[f64, StatError]
+def exponential(rate: f64 = 1.0) -> Result[Exponential, StatError]
+class Normal
+    def pdf(self, x: f64) -> Result[f64, StatError]
+    def cdf(self, x: f64) -> Result[f64, StatError]
+    def inverse_cdf(self, p: f64) -> Result[f64, StatError]
+    def sample(self, rng: &mut random.Rng) -> Result[f64, StatError]
+def normal(mean: f64 = 0.0, sigma: f64 = 1.0) -> Result[Normal, StatError]
+```
+
+## `std.plot`
+
+Layered charts from owned columns or record accessors, validated mappings, grouped statistics, and deterministic streaming SVG. Errors: `PlotError`. [Reference](plot.md).
+
+```text
+enum PlotError
+    Allocation(AllocError) | Format(FormatError) | Bytes(BytesError) | Write(i64, StreamError) | Io(StreamError) | UnknownColumn(str) | DuplicateColumn(str) | ShapeMismatch(str) | MissingAesthetic(str) | WrongKind(str) | Conflict(str) | InvalidSetting(str)
+enum Column
+    Num(list[f64]) | Int(list[i64]) | Text(list[str]) | Bool(list[bool]) | MaybeNum(list[Option[f64]]) | MaybeText(list[Option[str]])
+class Table
+    def share(self) -> Table
+    def height(self) -> i64
+    def names(self) -> Result[list[str], PlotError]
+def table(values: list[(str, Column)]) -> Result[Table, PlotError]
+def columns(values: &dict[str, list[f64]]) -> Result[Table, PlotError]
+enum Field[T]
+    Num(str, BoxedCallable[[&T], f64]) | Int(str, BoxedCallable[[&T], i64]) | Text(str, BoxedCallable[[&T], str]) | Bool(str, BoxedCallable[[&T], bool])
+def num[T, F: Callable[[&T], f64]](name: str, read: F) -> Result[Field[T], PlotError]
+def integer[T, F: Callable[[&T], i64]](name: str, read: F) -> Result[Field[T], PlotError]
+def text[T, F: Callable[[&T], str]](name: str, read: F) -> Result[Field[T], PlotError]
+def flag[T, F: Callable[[&T], bool]](name: str, read: F) -> Result[Field[T], PlotError]
+def rows[T](values: &list[T], fields: list[Field[T]]) -> Result[Table, PlotError]
+class Factor
+def factor(name: str) -> Factor
+class Mapping
+def aes(x: str | Factor = "", y: str | Factor = "", colour: str | Factor = "", color: str | Factor = "", fill: str | Factor = "", group: str = "", ymin: str = "", ymax: str = "") -> Mapping
+enum Position
+    Identity | Stack | Dodge | Fill
+def position_identity() -> Position
+def position_stack() -> Position
+def position_dodge() -> Position
+def position_fill() -> Position
+enum Units
+    In | Cm | Mm | Px
+enum Legend
+    Right | Hidden
+class Layer
+class Labels
+class Theme
+enum Component
+    Layer(Layer) | Labels(Labels) | Theme(Theme) | Cartesian(Option[(f64, f64)], Option[(f64, f64)]) | Flip | ColourScale(bool, ColourScale) | PositionScale(bool, PositionScale) | Facet(Facet)
+enum Scales
+    Fixed | Free | FreeX | FreeY
+class Facet
+def facet_wrap(facets: str, nrow: i64 = 0, ncol: i64 = 0, scales: Scales = Scales.Fixed) -> Component
+def facet_grid(rows: str = "", cols: str = "", scales: Scales = Scales.Fixed) -> Component
+enum ColourScale
+    Default | Manual(dict[str, str]) | Gradient(str, str)
+def scale_colour_manual(values: dict[str, str]) -> Component
+def scale_color_manual(values: dict[str, str]) -> Component
+def scale_fill_manual(values: dict[str, str]) -> Component
+def scale_colour_gradient(low: str = "#132B43", high: str = "#56B1F7") -> Component
+def scale_color_gradient(low: str = "#132B43", high: str = "#56B1F7") -> Component
+def scale_fill_gradient(low: str = "#132B43", high: str = "#56B1F7") -> Component
+enum Unset
+    Unset
+enum Transform
+    Identity | Log10 | Sqrt | Reverse
+class PositionScale
+def scale_x_continuous(name: str = "", breaks: Option[list[f64]] = Nothing, labels: Option[list[str]] = Nothing, limits: (f64, f64) | Unset = Unset.Unset, transform: Transform = Transform.Identity) -> Component
+def scale_y_continuous(name: str = "", breaks: Option[list[f64]] = Nothing, labels: Option[list[str]] = Nothing, limits: (f64, f64) | Unset = Unset.Unset, transform: Transform = Transform.Identity) -> Component
+def scale_x_discrete(name: str = "", limits: Option[list[str]] = Nothing, labels: Option[list[str]] = Nothing) -> Component
+def scale_y_discrete(name: str = "", limits: Option[list[str]] = Nothing, labels: Option[list[str]] = Nothing) -> Component
+def scale_x_log10(name: str = "", breaks: Option[list[f64]] = Nothing, labels: Option[list[str]] = Nothing, limits: (f64, f64) | Unset = Unset.Unset) -> Component
+def scale_y_log10(name: str = "", breaks: Option[list[f64]] = Nothing, labels: Option[list[str]] = Nothing, limits: (f64, f64) | Unset = Unset.Unset) -> Component
+def scale_x_sqrt(name: str = "", breaks: Option[list[f64]] = Nothing, labels: Option[list[str]] = Nothing, limits: (f64, f64) | Unset = Unset.Unset) -> Component
+def scale_x_reverse(name: str = "", breaks: Option[list[f64]] = Nothing, labels: Option[list[str]] = Nothing, limits: (f64, f64) | Unset = Unset.Unset) -> Component
+def scale_y_sqrt(name: str = "", breaks: Option[list[f64]] = Nothing, labels: Option[list[str]] = Nothing, limits: (f64, f64) | Unset = Unset.Unset) -> Component
+def scale_y_reverse(name: str = "", breaks: Option[list[f64]] = Nothing, labels: Option[list[str]] = Nothing, limits: (f64, f64) | Unset = Unset.Unset) -> Component
+def geom_point(colour: str = "", color: str = "", size: f64 | i64 = 1.5, alpha: f64 | i64 = 1.0, na_rm: bool = False, data: Table | Unset = Unset.Unset, mapping: Mapping | Unset = Unset.Unset, inherit_aes: bool = True) -> Component
+def geom_line(colour: str = "", color: str = "", linewidth: f64 | i64 = 0.5, alpha: f64 | i64 = 1.0, na_rm: bool = False, data: Table | Unset = Unset.Unset, mapping: Mapping | Unset = Unset.Unset, inherit_aes: bool = True) -> Component
+def geom_path(colour: str = "", color: str = "", linewidth: f64 | i64 = 0.5, alpha: f64 | i64 = 1.0, na_rm: bool = False, data: Table | Unset = Unset.Unset, mapping: Mapping | Unset = Unset.Unset, inherit_aes: bool = True) -> Component
+def geom_col(colour: str = "", color: str = "", fill: str = "", width: f64 | i64 = 0.9, alpha: f64 | i64 = 1.0, position: Position = Position.Stack, na_rm: bool = False, data: Table | Unset = Unset.Unset, mapping: Mapping | Unset = Unset.Unset, inherit_aes: bool = True) -> Component
+def geom_bar(colour: str = "", color: str = "", fill: str = "", width: f64 | i64 = 0.9, alpha: f64 | i64 = 1.0, position: Position = Position.Stack, na_rm: bool = False, data: Table | Unset = Unset.Unset, mapping: Mapping | Unset = Unset.Unset, inherit_aes: bool = True) -> Component
+def geom_histogram(colour: str = "", color: str = "", fill: str = "", bins: i64 = 30, alpha: f64 | i64 = 1.0, position: Position = Position.Stack, na_rm: bool = False, data: Table | Unset = Unset.Unset, mapping: Mapping | Unset = Unset.Unset, inherit_aes: bool = True) -> Component
+def geom_errorbar(colour: str = "", color: str = "", linewidth: f64 | i64 = 0.5, width: f64 | i64 = 0.2, alpha: f64 | i64 = 1.0, na_rm: bool = False, data: Table | Unset = Unset.Unset, mapping: Mapping | Unset = Unset.Unset, inherit_aes: bool = True) -> Component
+def geom_linerange(colour: str = "", color: str = "", linewidth: f64 | i64 = 0.5, alpha: f64 | i64 = 1.0, na_rm: bool = False, data: Table | Unset = Unset.Unset, mapping: Mapping | Unset = Unset.Unset, inherit_aes: bool = True) -> Component
+def geom_ribbon(colour: str = "", color: str = "", fill: str = "", linewidth: f64 | i64 = 0.5, alpha: f64 | i64 = 0.3, na_rm: bool = False, data: Table | Unset = Unset.Unset, mapping: Mapping | Unset = Unset.Unset, inherit_aes: bool = True) -> Component
+def labs(title: str = "", x: str = "", y: str = "", colour: str = "", fill: str = "") -> Component
+def theme_grey(base_size: f64 | i64 = 11, legend_position: Legend = Legend.Right) -> Component
+def theme_minimal(base_size: f64 | i64 = 11, legend_position: Legend = Legend.Right) -> Component
+def theme_classic(base_size: f64 | i64 = 11, legend_position: Legend = Legend.Right) -> Component
+def coord_flip() -> Component
+def coord_cartesian(xlim: (f64, f64) | Unset = Unset.Unset, ylim: (f64, f64) | Unset = Unset.Unset) -> Component
+class Plot
+    def plus(self, components: list[Component]) -> Result[Plot, PlotError]
+    def write_svg[W: Writer](self, writer: &mut W, width: f64 = 6.0, height: f64 = 4.0, units: Units = Units.In, dpi: f64 = 300.0) -> Result[list[str], PlotError]
+    def save(self, path: &str, width: f64 = 6.0, height: f64 = 4.0, units: Units = Units.In, dpi: f64 = 300.0) -> Result[list[str], PlotError]
+def ggplot(data: Table, mapping: Mapping, components: list[Component]) -> Result[Plot, PlotError]
+```
+
+## `std.linalg`
+
+Dense f64 matrices, products, solves, LU, QR, Cholesky, SVD and eigen decompositions through an optional faer engine. Errors: `AllocError`, `LinalgError`. [Reference](linalg.md).
+
+```text
+enum LinalgError
+    Shape | Bounds | NonFinite | Singular | NotSymmetric | NotPositiveDefinite | NoConvergence | Overflow | NativePanic
+class Matrix
+    def rows(self) -> i64
+    def cols(self) -> i64
+    def get(self, row: i64, col: i64) -> Result[f64, LinalgError]
+    def set(self: &mut Matrix, row: i64, col: i64, value: f64) -> Result[(), LinalgError]
+    def to_list(self) -> Result[list[f64], AllocError]
+    def transpose(self) -> Result[Matrix, AllocError]
+    def add(self, rhs: &Matrix) -> Result[Matrix, AllocError | LinalgError]
+    def subtract(self, rhs: &Matrix) -> Result[Matrix, AllocError | LinalgError]
+    def scale(self, factor: f64) -> Result[Matrix, AllocError | LinalgError]
+    def negate(self) -> Result[Matrix, AllocError | LinalgError]
+    def __add__(self, rhs: &Matrix) -> Result[Matrix, AllocError | LinalgError]
+    def __sub__(self, rhs: &Matrix) -> Result[Matrix, AllocError | LinalgError]
+    def __neg__(self) -> Result[Matrix, AllocError | LinalgError]
+    def __mul__(self, rhs: &Matrix) -> Result[Matrix, AllocError | LinalgError]
+    def __rmul__(self, factor: f64) -> Result[Matrix, AllocError | LinalgError]
+    def matmul(self, rhs: &Matrix) -> Result[Matrix, AllocError | LinalgError]
+    def lu(self) -> Result[Lu, AllocError | LinalgError]
+    def solve(self, rhs: &Matrix) -> Result[Matrix, AllocError | LinalgError]
+    def qr(self) -> Result[(Matrix, Matrix), AllocError | LinalgError]
+    def cholesky(self) -> Result[Matrix, AllocError | LinalgError]
+    def svd(self) -> Result[(Matrix, list[f64], Matrix), AllocError | LinalgError]
+    def eigh(self) -> Result[(list[f64], Matrix), AllocError | LinalgError]
+    def eig(self) -> Result[(list[f64], list[f64], Matrix, Matrix), AllocError | LinalgError]
+class Lu
+    def lower(self) -> Result[Matrix, AllocError | LinalgError]
+    def upper(self) -> Result[Matrix, AllocError | LinalgError]
+    def permutation(self) -> Result[list[i64], AllocError]
+    def solve(self, rhs: &Matrix) -> Result[Matrix, AllocError | LinalgError]
+def matrix(rows: i64, cols: i64, values: &list[f64]) -> Result[Matrix, AllocError | LinalgError]
+def vector(values: &list[f64]) -> Result[Matrix, AllocError | LinalgError]
+def zeros(rows: i64, cols: i64) -> Result[Matrix, AllocError | LinalgError]
+def identity(n: i64) -> Result[Matrix, AllocError | LinalgError]
+def diagonal(values: &list[f64]) -> Result[Matrix, AllocError | LinalgError]
+```
+
+## `std.sync`
+
+Shared cooperative cancellation tokens. Errors: `AllocError`. [Reference](sync.md).
+
+Compiler-provided: `CancellationToken`. Their signatures are on the reference page.
+
+```text
+class Mutex[T]
+    def __init__(self, value: T) -> ()
+```
+
+## `std.system`
+
+Bounded Linux procfs snapshots: CPUs, memory, load, uptime, block devices, disk I/O and process status. Errors: `IoError`, `SystemError`. [Reference](system.md).
+
+```text
+enum SystemError
+    Io(IoError) | Stream(StreamError) | Allocation(AllocError) | InvalidInput | Limit | Malformed(str)
+class Memory
+    total_bytes: u64
+    free_bytes: u64
+    available_bytes: Option[u64]
+    swap_total_bytes: u64
+    swap_free_bytes: u64
+class LoadAverage
+    one_minute: f64
+    five_minutes: f64
+    fifteen_minutes: f64
+    runnable_tasks: u64
+    total_tasks: u64
+    last_pid: u32
+class Uptime
+    seconds: f64
+    idle_cpu_seconds: f64
+class BlockDevice
+    major: u32
+    minor: u32
+    name: str
+    size_bytes: u64
+class DiskIo
+    major: u32
+    minor: u32
+    name: str
+    reads_completed: u64
+    bytes_read: u64
+    writes_completed: u64
+    bytes_written: u64
+    in_flight: u64
+    busy_milliseconds: u64
+class Process
+    pid: u32
+    parent_pid: u32
+    name: str
+    state: str
+    real_uid: u32
+    threads: u64
+    virtual_bytes: Option[u64]
+    resident_bytes: Option[u64]
+class Procfs
+    def cpu_count(self, max_bytes: i64 = 1048576) -> Result[i64, SystemError]
+    def memory(self, max_bytes: i64 = 65536) -> Result[Memory, SystemError]
+    def load_average(self, max_bytes: i64 = 4096) -> Result[LoadAverage, SystemError]
+    def uptime(self, max_bytes: i64 = 4096) -> Result[Uptime, SystemError]
+    def block_devices(self, max_bytes: i64 = 1048576, max_devices: i64 = 4096) -> Result[list[BlockDevice], SystemError]
+    def disk_io(self, max_bytes: i64 = 1048576, max_devices: i64 = 4096) -> Result[list[DiskIo], SystemError]
+    def process_ids(self, max_entries: i64 = 65536) -> Result[list[u32], SystemError]
+    def process(self, pid: u32, max_bytes: i64 = 65536) -> Result[Process, SystemError]
+def open_procfs(path: &Path) -> Result[Procfs, IoError]
+def local() -> Result[Procfs, IoError]
+```
+
+## `std.tempfile`
+
+Unnamed and named temporary files, recursively cleaned directories, context managers and explicit ownership transfer. Errors: `IoError`, `FsError`, `StreamError`, `AllocError`. [Reference](tempfile.md).
+
+```text
+def default_dir() -> Result[Path, IoError]
+class TemporaryFile
+    def stream(self: &mut TemporaryFile) -> &mut FileStream
+    def close(self: &mut TemporaryFile) -> Result[(), StreamError]
+    def __enter__(self: &mut TemporaryFile) -> &mut FileStream
+    def __exit__(self: &mut TemporaryFile) -> ()
+def file(parent: &Path = default_dir()?) -> Result[TemporaryFile, IoError]
+class NamedTemporaryFile
+    def path(self) -> &Path
+    def read(self: &mut NamedTemporaryFile, buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StreamError]
+    def write[S: ByteSource](self: &mut NamedTemporaryFile, source: &S, start: i64, stop: i64) -> Result[i64, StreamError]
+    def flush(self: &mut NamedTemporaryFile) -> Result[(), StreamError]
+    def sync(self: &mut NamedTemporaryFile) -> Result[(), StreamError]
+    def seek(self: &mut NamedTemporaryFile, target: SeekFrom) -> Result[i64, StreamError]
+    def close(self: &mut NamedTemporaryFile) -> Result[(), FsError]
+    def keep(self: &mut NamedTemporaryFile) -> Result[Path, AllocError]
+    def __enter__(self: &mut NamedTemporaryFile) -> &mut NamedTemporaryFile
+    def __exit__(self: &mut NamedTemporaryFile) -> ()
+def named_file(parent: &Path = io_error(default_dir())?, prefix: &str = "plenty-", suffix: &str = "") -> Result[NamedTemporaryFile, FsError]
+class TemporaryDirectory
+    def path(self) -> &Path
+    def root(self) -> &Root
+    def cleanup(self: &mut TemporaryDirectory) -> Result[(), FsError]
+    def keep(self: &mut TemporaryDirectory) -> Result[Path, AllocError]
+    def __enter__(self: &mut TemporaryDirectory) -> &mut TemporaryDirectory
+    def __exit__(self: &mut TemporaryDirectory) -> ()
+def directory(parent: &Path = io_error(default_dir())?, prefix: &str = "plenty-", max_entries: i64 = 100000, max_depth: i64 = 64) -> Result[TemporaryDirectory, FsError]
+```
+
+## `std.test`
+
+Assertions that explain their failure on standard error, self-removing scratch directories, the seeded generator for `plenty test`, and fake clocks and streams. Errors: `TestError`. [Reference](test.md).
+
+```text
+enum TestError
+    Assertion | Fixture(FsError) | Allocation(AllocError) | InvalidSeed | Unavailable
+def fail(message: &str) -> Result[(), TestError]
+def check(condition: bool, message: &str) -> Result[(), TestError]
+def equal[T](left: &T, right: &T) -> Result[(), TestError]
+def not_equal[T](left: &T, right: &T) -> Result[(), TestError]
+def less[T](left: &T, right: &T) -> Result[(), TestError]
+def close(left: f64, right: f64, tolerance: f64) -> Result[(), TestError]
+def is_ok[T, E](result: &Result[T, E]) -> Result[(), TestError]
+def is_err[T, E](result: &Result[T, E]) -> Result[(), TestError]
+def fail_allocations_after(count: u32) -> Result[(), TestError]
+def restore_allocations() -> Result[(), TestError]
+def fail_files_after(count: u32, code: i32) -> Result[(), TestError]
+def restore_files() -> Result[(), TestError]
+class Scratch
+    def path(self) -> &Path
+    def root(self) -> &Root
+    def file(self, name: &str) -> Result[str, TestError]
+    def cleanup(self: &mut Scratch) -> Result[(), TestError]
+def scratch() -> Result[Scratch, TestError]
+def seed() -> Result[u64, TestError]
+def rng() -> Result[Rng, TestError]
+class FakeClock
+    def now(self) -> Instant
+    def advance(self: &mut FakeClock, span: &Duration) -> Result[(), RangeError]
+    def set(self: &mut FakeClock, nanoseconds_after_origin: u64) -> ()
+def fake_clock(nanoseconds_after_origin: u64) -> FakeClock
+class FakeStream
+    input: Bytes
+    output: Bytes
+    def calls(self) -> i64
+    def limit(self: &mut FakeStream, bytes: i64) -> ()
+    def fail_after(self: &mut FakeStream, after: i64, error: StreamError) -> ()
+    def read(self: &mut FakeStream, buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StreamError]
+    def write[S: ByteSource](self: &mut FakeStream, source: &S, start: i64, stop: i64) -> Result[i64, StreamError]
+    def flush(self: &mut FakeStream) -> Result[(), StreamError]
+def fake_stream(input: Bytes) -> Result[FakeStream, BytesError]
+```
+
+## `std.text`
+
+Bounded reusable builders, joining, and scalar wrapping. Errors: `TextError`. [Reference](text.md).
+
+```text
+def find_in[S: ByteSource](text: &str, set: &S) -> Option[i64]
+def find_not_in[S: ByteSource](text: &str, set: &S) -> Option[i64]
+enum TextError
+    InvalidLimit | LimitExceeded | Allocation(AllocError) | Bytes(BytesError)
+class Builder
+    def byte_len(self) -> i64
+    def limit(self) -> i64
+    def append(self: &mut Builder, text: &str) -> Result[(), TextError]
+    def clear(self: &mut Builder) -> ()
+    def to_text(self) -> Result[str, TextError]
+    def finish(self: Builder) -> Result[str, TextError]
+def builder(max_bytes: i64) -> Result[Builder, TextError]
+def join(pieces: &list[str], separator: &str, max_bytes: i64) -> Result[str, TextError]
+def wrap(text: &str, width: i64, max_bytes: i64) -> Result[str, TextError]
+```
+
+## `std.thread`
+
+Explicit scoped thread and owned-job imports. Errors: `ThreadError`, `SpawnError[F]`. [Reference](thread.md).
+
+Compiler-provided: `spawn`, `ThreadError`, `SpawnError`. Their signatures are on the reference page.
+
+## `std.time`
+
+Checked durations, monotonic instants and deadlines, wall timestamps, and sleep. Errors: `RangeError`. [Reference](time.md).
+
+```text
+class Duration
+    def as_nanoseconds(self) -> u64
+    def as_microseconds(self) -> u64
+    def as_milliseconds(self) -> u64
+    def as_seconds(self) -> u64
+    def as_timeout_ms(self) -> u64
+    def is_zero(self) -> bool
+    def checked_add(self, other: &Duration) -> Result[Duration, RangeError]
+    def checked_sub(self, other: &Duration) -> Result[Duration, RangeError]
+    def saturating_sub(self, other: &Duration) -> Duration
+    def checked_mul(self, factor: u64) -> Result[Duration, RangeError]
+def nanoseconds(count: u64) -> Duration
+def microseconds(count: u32) -> Duration
+def milliseconds(count: u32) -> Duration
+def seconds(count: u32) -> Duration
+class Instant
+    def checked_add(self, span: &Duration) -> Result[Instant, RangeError]
+    def duration_since(self, earlier: &Instant) -> Result[Duration, RangeError]
+    def saturating_duration_since(self, earlier: &Instant) -> Duration
+def monotonic_now() -> Instant
+def instant_at(nanoseconds_after_origin: u64) -> Instant
+protocol Clock
+    def now(self) -> Instant
+class MonotonicClock
+    def now(self) -> Instant
+def monotonic_clock() -> MonotonicClock
+class Deadline
+    def expired(self, now: &Instant) -> bool
+    def remaining(self, now: &Instant) -> Duration
+def deadline_at(at: &Instant) -> Deadline
+def deadline_after(start: &Instant, budget: &Duration) -> Result[Deadline, RangeError]
+class Timestamp
+    seconds: i64
+    nanoseconds: u32
+    def duration_since(self, earlier: &Timestamp) -> Result[Duration, RangeError]
+    def checked_add(self, span: &Duration) -> Result[Timestamp, RangeError]
+def wall_now() -> Timestamp
+def sleep(span: &Duration) -> ()
+def sleep_until(deadline: &Deadline) -> ()
+```
+
+## `std.tls`
+
+TLS 1.2 and 1.3 client and server streams over `std.net` TCP, with verified certificates, client certificates, ALPN, deadlines, and cancellation. Errors: `TlsError`. [Reference](tls.md).
+
+```text
+enum TlsError
+    Net(NetError) | UntrustedCertificate | ExpiredCertificate | WrongHost | InvalidCertificate | Rejected | Protocol | Truncated | InvalidName | InvalidConfiguration | NoTrustRoots | Closed | Allocation(AllocError) | RevokedCertificate | CertificateRequired | Incompatible
+enum TlsVersion
+    Tls12 | Tls13
+enum CipherSuite
+    Tls13Aes256GcmSha384 | Tls13Aes128GcmSha256 | Tls13Chacha20Poly1305Sha256 | EcdheEcdsaAes256GcmSha384 | EcdheEcdsaAes128GcmSha256 | EcdheEcdsaChacha20Poly1305Sha256 | EcdheRsaAes256GcmSha384 | EcdheRsaAes128GcmSha256 | EcdheRsaChacha20Poly1305Sha256
+enum ClientCertificates
+    Required | Optional
+class TrustRoots
+    def len(self) -> i64
+def roots_from_pem(pem: &str) -> Result[TrustRoots, TlsError]
+def system_roots() -> Result[TrustRoots, TlsError]
+class ClientConfig
+class ServerConfig
+class ClientBuilder
+    def certificate(self: &mut ClientBuilder, chain_pem: &str, key_pem: &str) -> Result[(), TlsError]
+    def application_protocol(self: &mut ClientBuilder, name: &str) -> Result[(), TlsError]
+    def minimum_version(self: &mut ClientBuilder, version: TlsVersion) -> ()
+    def cipher_suite(self: &mut ClientBuilder, suite: CipherSuite) -> ()
+    def revocation_list(self: &mut ClientBuilder, crl_pem: &str) -> Result[(), TlsError]
+    def build(self) -> Result[ClientConfig, TlsError]
+def client_builder(roots: &TrustRoots) -> Result[ClientBuilder, TlsError]
+def client_config(roots: &TrustRoots) -> Result[ClientConfig, TlsError]
+class ServerBuilder
+    def certificate(self: &mut ServerBuilder, chain_pem: &str, key_pem: &str) -> Result[(), TlsError]
+    def verify_clients(self: &mut ServerBuilder, roots: &TrustRoots, certificates: ClientCertificates) -> ()
+    def application_protocol(self: &mut ServerBuilder, name: &str) -> Result[(), TlsError]
+    def minimum_version(self: &mut ServerBuilder, version: TlsVersion) -> ()
+    def cipher_suite(self: &mut ServerBuilder, suite: CipherSuite) -> ()
+    def revocation_list(self: &mut ServerBuilder, crl_pem: &str) -> Result[(), TlsError]
+    def build(self) -> Result[ServerConfig, TlsError]
+def server_builder(chain_pem: &str, key_pem: &str) -> Result[ServerBuilder, TlsError]
+def server_config(chain_pem: &str, key_pem: &str) -> Result[ServerConfig, TlsError]
+class TlsStream
+    def handshake_before(self: &mut TlsStream, deadline: &Deadline, cancel: &CancellationToken) -> Result[(), TlsError]
+    def try_handshake(self: &mut TlsStream) -> Result[bool, TlsError]
+    def try_flush(self: &mut TlsStream) -> Result[bool, TlsError]
+    def try_read(self: &mut TlsStream, buffer: &mut Bytes, start: i64, stop: i64) -> Result[Option[i64], TlsError]
+    def try_write[S: ByteSource](self: &mut TlsStream, source: &S, start: i64, stop: i64) -> Result[Option[i64], TlsError]
+    def interest(self) -> Interest
+    def watch(self, selector: &mut Selector, key: u64, interest: Interest) -> Result[(), TlsError]
+    def unwatch(self, selector: &mut Selector) -> Result[(), TlsError]
+    def read_before(self: &mut TlsStream, buffer: &mut Bytes, start: i64, stop: i64, deadline: &Deadline, cancel: &CancellationToken) -> Result[i64, TlsError]
+    def write_before[S: ByteSource](self: &mut TlsStream, source: &S, start: i64, stop: i64, deadline: &Deadline, cancel: &CancellationToken) -> Result[i64, TlsError]
+    def write_all_before[S: ByteSource](self: &mut TlsStream, source: &S, start: i64, stop: i64, deadline: &Deadline, cancel: &CancellationToken) -> Result[(), TlsError]
+    def close_before(self: &mut TlsStream, deadline: &Deadline, cancel: &CancellationToken) -> Result[(), TlsError]
+    def shutdown(self: &mut TlsStream, direction: Shutdown) -> Result[(), TlsError]
+    def read(self: &mut TlsStream, buffer: &mut Bytes, start: i64, stop: i64) -> Result[i64, StreamError]
+    def write[S: ByteSource](self: &mut TlsStream, source: &S, start: i64, stop: i64) -> Result[i64, StreamError]
+    def flush(self: &mut TlsStream) -> Result[(), StreamError]
+    def close(self: &mut TlsStream) -> Result[(), StreamError]
+    def application_protocol(self) -> Result[Option[str], TlsError]
+    def server_name(self) -> Result[Option[str], TlsError]
+    def peer_certificate(self) -> Result[Option[Bytes], TlsError]
+    def version(self) -> Option[TlsVersion]
+    def cipher_suite(self) -> Option[CipherSuite]
+def start_connect(tcp: TcpStream, config: &ClientConfig, server_name: &str) -> Result[TlsStream, TlsError]
+def start_accept(tcp: TcpStream, config: &ServerConfig) -> Result[TlsStream, TlsError]
+def connect(tcp: TcpStream, config: &ClientConfig, server_name: &str, deadline: &Deadline, cancel: &CancellationToken) -> Result[TlsStream, TlsError]
+def accept(tcp: TcpStream, config: &ServerConfig, deadline: &Deadline, cancel: &CancellationToken) -> Result[TlsStream, TlsError]
+class Session
+    def feed(self: &mut Session, source: &Bytes, start: i64, stop: i64) -> Result[i64, TlsError]
+    def feed_end(self: &mut Session) -> Result[(), TlsError]
+    def take(self: &mut Session, target: &mut Bytes, start: i64, stop: i64) -> Result[i64, TlsError]
+    def read(self: &mut Session, target: &mut Bytes, start: i64, stop: i64) -> Result[Option[i64], TlsError]
+    def write[S: ByteSource](self: &mut Session, source: &S, start: i64, stop: i64) -> Result[i64, TlsError]
+    def close(self: &mut Session) -> ()
+    def handshaking(self) -> bool
+    def wants_write(self) -> bool
+    def wants_read(self) -> bool
+    def application_protocol(self) -> Result[Option[str], TlsError]
+    def server_name(self) -> Result[Option[str], TlsError]
+    def peer_certificate(self) -> Result[Option[Bytes], TlsError]
+    def version(self) -> Option[TlsVersion]
+    def cipher_suite(self) -> Option[CipherSuite]
+def client_session(config: &ClientConfig, server_name: &str) -> Result[Session, TlsError]
+def server_session(config: &ServerConfig) -> Result[Session, TlsError]
+```
+
+## `std.toml`
+
+Strict TOML 1.0 parsing, value-tree writing and format-preserving document edits, under depth, input, and output limits. Errors: `TomlError`. [Reference](toml.md).
+
+```text
+enum TomlFault
+    UnexpectedByte | UnexpectedEnd | InvalidUtf8 | ControlCharacter | InvalidEscape | InvalidNumber | NumberOutOfRange | InvalidDateTime | DuplicateKey | DuplicateTable | KeyConflict | DepthExceeded | InputTooLarge | OutputTooLarge | NotATable | InvalidLimits | OutOfRange | Stream(StreamError) | Allocation(AllocError)
+class TomlError
+    fault: TomlFault
+    offset: i64
+    line: i64
+    column: i64
+class Limits
+    max_depth: i64
+    max_input: i64
+    max_output: i64
+enum DateTimeKind
+    OffsetDateTime | LocalDateTime | LocalDate | LocalTime
+class DateTime
+    kind: DateTimeKind
+    year: i64
+    month: i64
+    day: i64
+    hour: i64
+    minute: i64
+    second: i64
+    nanosecond: i64
+    offset_minutes: i64
+enum Toml
+    Bool(bool) | Int(i64) | Float(f64) | Text(str) | DateTime(DateTime) | Array(list[Toml]) | Table(list[Entry])
+class Entry
+    key: str
+    value: Toml
+def limits() -> Limits
+def parse(source: &Bytes, bounds: &Limits) -> Result[Toml, TomlError]
+def parse_text(text: &str, bounds: &Limits) -> Result[Toml, TomlError]
+def read_value[R: Reader](reader: &mut R, bounds: &Limits) -> Result[Toml, TomlError]
+def find(entries: &list[Entry], key: &str) -> Option[i64]
+def encode(value: &Toml, bounds: &Limits) -> Result[Bytes, TomlError]
+def encode_text(value: &Toml, bounds: &Limits) -> Result[str, TomlError]
+def write_value[W: Writer](writer: &mut W, value: &Toml, bounds: &Limits) -> Result[(), TomlError]
+class Document
+    def text(self) -> Result[str, TomlError]
+    def get(self, path: &list[str]) -> Result[Option[Toml], TomlError]
+    def set(self: &mut Document, path: &list[str], value: &Toml) -> Result[(), TomlError]
+    def insert(self: &mut Document, path: &list[str], value: &Toml) -> Result[(), TomlError]
+    def remove(self: &mut Document, path: &list[str]) -> Result[bool, TomlError]
+def document(source: &Bytes, bounds: &Limits) -> Result[Document, TomlError]
+def document_text(text: &str, bounds: &Limits) -> Result[Document, TomlError]
+```
+
+## `std.unicode`
+
+Unicode 17 normalization, combining classes, and Mark classification. Errors: `TextError`. [Reference](unicode.md).
+
+```text
+def version() -> str
+def combining_class(scalar: &str) -> Option[u32]
+def is_mark(scalar: &str) -> Option[bool]
+def nfd(text: &str, max_scalars: i64) -> Result[str, TextError]
+def nfc(text: &str, max_scalars: i64) -> Result[str, TextError]
+def nfkd(text: &str, max_scalars: i64) -> Result[str, TextError]
+def nfkc(text: &str, max_scalars: i64) -> Result[str, TextError]
+```
+
+## `std.url`
+
+Strict RFC 3986 absolute URL parsing and formatting without normalization, component-aware percent encoding, and query pairs. Errors: `UrlError`. [Reference](url.md).
+
+```text
+enum UrlError
+    InvalidLimit | LimitExceeded | OutOfRange | MissingScheme | MissingHost | InvalidByte(i64) | InvalidEscape(i64) | InvalidHost(i64) | InvalidPort(i64) | InvalidUtf8 | Allocation(AllocError)
+enum Component
+    Userinfo | Segment | Path | Query | QueryPart | Fragment
+class Url
+    scheme: str
+    userinfo: Option[str]
+    host: Option[str]
+    port: Option[i64]
+    path: str
+    query: Option[str]
+    fragment: Option[str]
+    def format(self) -> Result[str, UrlError]
+class Pair
+    key: str
+    value: str
+def parse(text: &str, max_bytes: i64) -> Result[Url, UrlError]
+def encode_bytes(source: &Bytes, start: i64, stop: i64, component: Component) -> Result[Bytes, UrlError]
+def decode_bytes(source: &Bytes, start: i64, stop: i64) -> Result[Bytes, UrlError]
+def encode(text: &str, component: Component) -> Result[str, UrlError]
+def decode(text: &str) -> Result[str, UrlError]
+def query_pairs(query: &str) -> Result[list[Pair], UrlError]
+def query_text(pairs: &list[Pair]) -> Result[str, UrlError]
+```
+
+## `std.uuid`
+
+UUID values, canonical text and network bytes, random v4 and timestamp-prefixed v7 generation. Errors: `ParseError`, `BytesError`, `SecretsError`, `RangeError`. [Reference](uuid.md).
+
+```text
+class Uuid
+    def as_u64_pair(self) -> (u64, u64)
+    def compare(self, other: &Uuid) -> i64
+    def is_nil(self) -> bool
+    def is_rfc_variant(self) -> bool
+    def version(self) -> Option[u8]
+    def unix_milliseconds(self) -> Option[u64]
+    def write_bytes(self, target: &mut Bytes, offset: i64) -> Result[(), BytesError]
+    def to_bytes(self) -> Result[Bytes, BytesError]
+    def to_string(self) -> Result[str, BytesError]
+def nil() -> Uuid
+def from_u64_pair(high: u64, low: u64) -> Uuid
+def parse(text: &str) -> Result[Uuid, ParseError]
+def from_bytes[S: ByteSource](source: &S) -> Result[Uuid, ParseError]
+def v4_from[R: Reader](source: &mut Source[R]) -> Result[Uuid, SecretsError]
+def v4() -> Result[Uuid, SecretsError]
+def v7_from[R: Reader](at: &Timestamp, source: &mut Source[R]) -> Result[Uuid, RangeError | SecretsError]
+def v7() -> Result[Uuid, RangeError | SecretsError]
+```
+
+## `std.xml`
+
+Bounded UTF-8 XML event readers and validating stream writers, without DTDs or external entities. Errors: `XmlError`. [Reference](xml.md).
+
+```text
+enum Fault
+    Syntax | UnexpectedEnd | InvalidName | InvalidCharacter | InvalidUtf8 | InvalidReference | UnknownEntity | DuplicateAttribute | MismatchedEnd | DoctypeForbidden | UnsupportedDeclaration | DepthExceeded | InputTooLarge | OutputTooLarge | TokenTooLarge | TooManyAttributes | InvalidLimits | InvalidState | Stopped | Allocation(AllocError) | Stream(StreamError)
+class XmlError
+    fault: Fault
+    offset: i64
+class Limits
+    max_depth: i64
+    max_input: i64
+    max_output: i64
+    max_token: i64
+    max_attributes: i64
+def limits() -> Limits
+class Attribute
+    name: str
+    value: str
+enum Event
+    Declaration(Option[bool]) | Start(str, list[Attribute]) | Empty(str, list[Attribute]) | End(str) | Text(str) | CData(str) | Comment(str) | ProcessingInstruction(str, str) | Eof
+class Reader[R]
+    inner: R
+    def offset(self) -> i64
+    def next(self: &mut Reader[R]) -> Result[Event, XmlError]
+def reader[R](inner: R, bounds: &Limits) -> Result[Reader[R], XmlError]
+class Writer[W]
+    inner: W
+    def offset(self) -> i64
+    def write(self: &mut Writer[W], event: &Event) -> Result[(), XmlError]
+    def finish(self: &mut Writer[W]) -> Result[(), XmlError]
+def writer[W](inner: W, bounds: &Limits) -> Result[Writer[W], XmlError]
+```

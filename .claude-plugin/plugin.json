@@ -1,0 +1,7 @@
+{
+  "name": "plenty",
+  "version": "0.7.1",
+  "description": "Write, check, and fix Plenty programs and packages. Matches Plenty 0.7.1.",
+  "license": "MIT OR Apache-2.0",
+  "keywords": ["plenty", "programming-language", "compiler"]
+}
